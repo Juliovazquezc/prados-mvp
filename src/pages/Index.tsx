@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useListings } from "@/contexts/ListingsContext";
 import { Link } from "react-router-dom";
@@ -20,36 +19,43 @@ const Index = () => {
 
   // Filter listings by category and search query
   const filteredListings = listings
-    .filter(listing => selectedCategory === "All" || listing.category === selectedCategory)
-    .filter(listing =>
-      listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      listing.description.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (listing) =>
+        selectedCategory === "All" || listing.category === selectedCategory
+    )
+    .filter(
+      (listing) =>
+        listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        listing.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-grow marketplace-container pb-20">
         <section className="py-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-              Neighborhood Marketplace
+              Prados MVP
             </h1>
             {isAuthenticated && (
               <Button asChild>
                 <Link to="/create" className="flex items-center">
-                  <Plus size={18} className="mr-2" /> 
+                  <Plus size={18} className="mr-2" />
                   <span className="hidden sm:inline">Create Listing</span>
                   <span className="sm:hidden">Sell</span>
                 </Link>
               </Button>
             )}
           </div>
-          
+
           <div className="mb-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <Input
                 type="text"
                 placeholder="Search listings..."
@@ -59,7 +65,7 @@ const Index = () => {
               />
             </div>
           </div>
-          
+
           <CategoryFilter
             onSelectCategory={(category) => setSelectedCategory(category)}
             selectedCategory={selectedCategory}
@@ -87,7 +93,7 @@ const Index = () => {
           )}
         </section>
       </main>
-      
+
       <BottomNavigation />
     </div>
   );
