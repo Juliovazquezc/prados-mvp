@@ -92,7 +92,7 @@ const CreateListing = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // if (!validateForm() || !user) return;
+    if (!validateForm() || !user) return;
 
     setIsLoading(true);
 
