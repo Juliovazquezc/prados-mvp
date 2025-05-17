@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useListings, ListingCategory, CATEGORIES } from "@/contexts/ListingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,12 +17,28 @@ import BottomNavigation from "@/components/BottomNavigation";
 import ImageUpload from "@/components/ImageUpload";
 import RequireAuth from "@/components/RequireAuth";
 import { Spinner } from "@/components/Spinner";
+import { supabase } from "@/lib/supabase";
+import { v4 as uuidv4 } from "uuid";
+import { toast } from "sonner";
+
+export const CATEGORIES = [
+  "Electronics",
+  "Furniture",
+  "Clothing",
+  "Books",
+  "Sports",
+  "Tools",
+  "Vehicles",
+  "Other",
+] as const;
+
+export type ListingCategory = (typeof CATEGORIES)[number];
 
 const CreateListing = () => {
   const { user } = useAuth();
-  const { createListing, isLoading } = useListings();
   const navigate = useNavigate();
-  
+
+  const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -34,36 +48,86 @@ const CreateListing = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!title) newErrors.title = "Title is required";
     if (!description) newErrors.description = "Description is required";
     if (!price) newErrors.price = "Price is required";
     if (parseFloat(price) < 0) newErrors.price = "Price cannot be negative";
     if (!category) newErrors.category = "Category is required";
-    if (images.length === 0) newErrors.images = "At least one image is required";
-    
+    if (images.length === 0)
+      newErrors.images = "At least one image is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const uploadImage = async (imageFile: string): Promise<string> => {
+    try {
+      // Convert base64 to blob
+      const blob = await fetch(imageFile).then((res) => res.blob());
+
+      const fileName = `${uuidv4()}-${Date.now()}`;
+      const { error: uploadError } = await supabase.storage
+        .from("post-images")
+        .upload(fileName, blob, {
+          contentType: blob.type, // Use the blob's content type
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error("Upload error details:", uploadError);
+        throw uploadError;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("post-images").getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
+
+    if (!validateForm() || !user) return;
+
+    setIsLoading(true);
+
     try {
-      const newListing = {
-        title,
-        description,
-        price: parseFloat(price),
-        category: category as ListingCategory,
-        images,
-      };
-      
-      const createdListing = await createListing(newListing);
-      navigate(`/listings/${createdListing.id}`);
+      // Upload all images to Supabase Storage
+      const uploadPromises = images.map((image) => uploadImage(image));
+      const imageUrls = await Promise.all(uploadPromises);
+
+      // Create the post in the database
+      const { data: post, error } = await supabase
+        .from("posts")
+        .insert({
+          title,
+          description,
+          price: parseFloat(price),
+          category,
+          images: imageUrls,
+          user_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
+
+      toast.success("Listing created successfully!");
+      navigate(`/listings/${post.id}`);
     } catch (error) {
       console.error("Error creating listing:", error);
+      toast.error("Failed to create listing. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,13 +135,13 @@ const CreateListing = () => {
     <RequireAuth>
       <div className="min-h-screen flex flex-col">
         <Header />
-        
+
         <main className="flex-grow marketplace-container pb-20">
           <section className="py-6 max-w-2xl mx-auto">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
               Create Listing
             </h1>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="title">Title</Label>
@@ -88,9 +152,11 @@ const CreateListing = () => {
                   placeholder="What are you selling?"
                   className={errors.title ? "border-red-500" : ""}
                 />
-                {errors.title && <p className="text-red-500 text-sm">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm">{errors.title}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -101,9 +167,11 @@ const CreateListing = () => {
                   rows={4}
                   className={errors.description ? "border-red-500" : ""}
                 />
-                {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+                {errors.description && (
+                  <p className="text-red-500 text-sm">{errors.description}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="price">Price ($)</Label>
                 <Input
@@ -116,16 +184,22 @@ const CreateListing = () => {
                   placeholder="0.00"
                   className={errors.price ? "border-red-500" : ""}
                 />
-                {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
+                {errors.price && (
+                  <p className="text-red-500 text-sm">{errors.price}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={category}
-                  onValueChange={(value) => setCategory(value as ListingCategory)}
+                  onValueChange={(value) =>
+                    setCategory(value as ListingCategory)
+                  }
                 >
-                  <SelectTrigger className={errors.category ? "border-red-500" : ""}>
+                  <SelectTrigger
+                    className={errors.category ? "border-red-500" : ""}
+                  >
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -136,9 +210,11 @@ const CreateListing = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
+                {errors.category && (
+                  <p className="text-red-500 text-sm">{errors.category}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Images</Label>
                 <ImageUpload
@@ -146,9 +222,11 @@ const CreateListing = () => {
                   setImages={setImages}
                   maxImages={4}
                 />
-                {errors.images && <p className="text-red-500 text-sm">{errors.images}</p>}
+                {errors.images && (
+                  <p className="text-red-500 text-sm">{errors.images}</p>
+                )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">Contact Phone</Label>
                 <Input
@@ -161,14 +239,14 @@ const CreateListing = () => {
                   This number will be shown to interested buyers
                 </p>
               </div>
-              
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Spinner /> : "Create Listing"}
               </Button>
             </form>
           </section>
         </main>
-        
+
         <BottomNavigation />
       </div>
     </RequireAuth>
