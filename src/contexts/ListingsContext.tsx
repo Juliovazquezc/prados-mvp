@@ -39,9 +39,18 @@ const ListingsContext = createContext<ListingsContextType | undefined>(
   undefined
 );
 
+// Cache configuration
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+type CachedPost = {
+  data: Post;
+  timestamp: number;
+};
+
 export const ListingsProvider = ({ children }: { children: ReactNode }) => {
   const [listings, setListings] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [postCache, setPostCache] = useState<Record<string, CachedPost>>({});
   const { user } = useAuth();
 
   const fetchListings = async () => {
@@ -53,6 +62,16 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+
+      // Update cache with fresh data
+      const newCache: Record<string, CachedPost> = {};
+      data?.forEach((post) => {
+        newCache[post.id] = {
+          data: post,
+          timestamp: Date.now(),
+        };
+      });
+      setPostCache(newCache);
       setListings(data || []);
     } catch (error) {
       console.error("Error fetching listings:", error);
@@ -72,6 +91,16 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
 
   const getListingById = async (id: string) => {
     try {
+      // Check cache first
+      const cachedPost = postCache[id];
+      const now = Date.now();
+
+      // If we have a valid cached post that hasn't expired
+      if (cachedPost && now - cachedPost.timestamp < CACHE_EXPIRY_TIME) {
+        return cachedPost.data;
+      }
+
+      // If not in cache or expired, fetch from API
       const { data, error } = await supabase
         .from("posts")
         .select("*")
@@ -79,6 +108,18 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
         .single();
 
       if (error) throw error;
+
+      // Update cache with new data
+      if (data) {
+        setPostCache((prev) => ({
+          ...prev,
+          [id]: {
+            data,
+            timestamp: now,
+          },
+        }));
+      }
+
       return data;
     } catch (error) {
       console.error("Error fetching listing:", error);
@@ -93,9 +134,16 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
+      // Update listings state and cache
       setListings((prevListings) =>
         prevListings.filter((listing) => listing.id !== id)
       );
+      setPostCache((prev) => {
+        const newCache = { ...prev };
+        delete newCache[id];
+        return newCache;
+      });
+
       toast.success("Listing deleted successfully");
     } catch (error) {
       console.error("Error deleting listing:", error);
