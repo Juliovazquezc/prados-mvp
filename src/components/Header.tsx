@@ -2,17 +2,15 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Menu, X, User } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Menu, X } from "lucide-react";
 import { useIntl } from "react-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
-  const { user, isAuthenticated, signOut } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const intl = useIntl();
-
-  console.log(user);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
