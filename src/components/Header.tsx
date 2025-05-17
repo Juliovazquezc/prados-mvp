@@ -28,12 +28,7 @@ const Header = () => {
           <Link to="/" className="text-gray-700 hover:text-marketplace-primary">
             {intl.formatMessage({ id: "nav.home" })}
           </Link>
-          <Link
-            to="/search"
-            className="text-gray-700 hover:text-marketplace-primary"
-          >
-            {intl.formatMessage({ id: "nav.search" })}
-          </Link>
+
           {isAuthenticated ? (
             <>
               <Link

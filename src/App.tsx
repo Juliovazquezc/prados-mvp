@@ -21,7 +21,6 @@ import { SignUpForm } from "@/pages/SignUpForm";
 import Index from "./pages/Index";
 import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
-import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -49,7 +48,6 @@ const routes: RouteConfig[] = [
   { path: "/register", element: <SignUpForm /> },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail /> },
-  { path: "/search", element: <Search /> },
   { path: "*", element: <NotFound /> },
 ];
 
