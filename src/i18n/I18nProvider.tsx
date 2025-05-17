@@ -30,6 +30,9 @@ const MESSAGES = {
   es: esMessages,
 } as const;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const SafeIntlProvider = IntlProvider as unknown as React.ComponentType<any>;
+
 export const I18nProvider = ({ children }: I18nProviderProps) => {
   // Get initial locale from browser or localStorage
   const getInitialLocale = (): Locale => {
@@ -56,13 +59,13 @@ export const I18nProvider = ({ children }: I18nProviderProps) => {
         messages: MESSAGES[locale],
       }}
     >
-      <IntlProvider
+      <SafeIntlProvider
         messages={MESSAGES[locale]}
         locale={locale}
         defaultLocale="en"
       >
         {children}
-      </IntlProvider>
+      </SafeIntlProvider>
     </I18nContext.Provider>
   );
 };

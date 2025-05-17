@@ -1,6 +1,5 @@
-import { useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, X, Image } from "lucide-react";
+import { useRef } from "react";
+import { Plus, X } from "lucide-react";
 import { useIntl } from "react-intl";
 
 type ImageUploadProps = {
@@ -73,7 +72,7 @@ const ImageUpload = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square flex flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 hover:border-marketplace-primary bg-gray-50 hover:bg-gray-100 transition-colors"
+            className="aspect-square flex flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 hover:border-marketplace-primary bg-gray-50 hover:bg-gray-100 transition-colors p-4"
             aria-label={intl.formatMessage({ id: "imageUpload.addImage" })}
           >
             <Plus className="h-6 w-6 text-gray-600" />
