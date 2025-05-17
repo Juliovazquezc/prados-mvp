@@ -1,14 +1,18 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, X, User } from "lucide-react";
+import { useIntl } from "react-intl";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const intl = useIntl();
+
+  console.log(user);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -18,50 +22,68 @@ const Header = () => {
     <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
       <div className="marketplace-container mx-auto flex justify-between items-center h-16">
         <Link to="/" className="text-xl font-bold text-marketplace-primary">
-          NeighborMarket
+          {intl.formatMessage({ id: "app.title" })}
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-4">
           <Link to="/" className="text-gray-700 hover:text-marketplace-primary">
-            Home
+            {intl.formatMessage({ id: "nav.home" })}
           </Link>
-          <Link to="/search" className="text-gray-700 hover:text-marketplace-primary">
-            Search
+          <Link
+            to="/search"
+            className="text-gray-700 hover:text-marketplace-primary"
+          >
+            {intl.formatMessage({ id: "nav.search" })}
           </Link>
           {isAuthenticated ? (
             <>
-              <Link to="/create" className="text-gray-700 hover:text-marketplace-primary">
-                Sell Item
+              <Link
+                to="/create"
+                className="text-gray-700 hover:text-marketplace-primary"
+              >
+                {intl.formatMessage({ id: "app.createListing.short" })}
               </Link>
               <div className="flex items-center ml-4">
                 <Link to="/profile" className="flex items-center">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profileImage} />
-                    <AvatarFallback>{user?.name.substring(0, 2)}</AvatarFallback>
+                    {/* <AvatarImage src={user?.profileImage} /> */}
+                    <AvatarFallback></AvatarFallback>
                   </Avatar>
                 </Link>
-                <Button variant="ghost" onClick={logout} className="text-sm ml-4">
-                  Logout
+                <Button
+                  variant="ghost"
+                  onClick={signOut}
+                  className="text-sm ml-4"
+                >
+                  {intl.formatMessage({ id: "nav.logout" })}
                 </Button>
               </div>
             </>
           ) : (
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" asChild>
-                <Link to="/login">Login</Link>
+                <Link to="/login">
+                  {intl.formatMessage({ id: "nav.login" })}
+                </Link>
               </Button>
               <Button size="sm" asChild>
-                <Link to="/register">Register</Link>
+                <Link to="/register">
+                  {intl.formatMessage({ id: "nav.register" })}
+                </Link>
               </Button>
             </div>
           )}
+          <LanguageSwitcher />
         </nav>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={toggleMenu}>
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          <LanguageSwitcher />
+          <button onClick={toggleMenu}>
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -73,14 +95,14 @@ const Header = () => {
               className="p-2 hover:bg-gray-100 rounded-md"
               onClick={toggleMenu}
             >
-              Home
+              {intl.formatMessage({ id: "nav.home" })}
             </Link>
             <Link
               to="/search"
               className="p-2 hover:bg-gray-100 rounded-md"
               onClick={toggleMenu}
             >
-              Search
+              {intl.formatMessage({ id: "nav.search" })}
             </Link>
             {isAuthenticated ? (
               <>
@@ -89,24 +111,24 @@ const Header = () => {
                   className="p-2 hover:bg-gray-100 rounded-md"
                   onClick={toggleMenu}
                 >
-                  Sell Item
+                  {intl.formatMessage({ id: "app.createListing" })}
                 </Link>
                 <Link
                   to="/profile"
                   className="p-2 hover:bg-gray-100 rounded-md"
                   onClick={toggleMenu}
                 >
-                  Profile
+                  {intl.formatMessage({ id: "nav.profile" })}
                 </Link>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => {
-                    logout();
+                    signOut();
                     toggleMenu();
                   }}
                   className="justify-start"
                 >
-                  Logout
+                  {intl.formatMessage({ id: "nav.logout" })}
                 </Button>
               </>
             ) : (
@@ -117,14 +139,14 @@ const Header = () => {
                   className="w-full"
                   asChild
                 >
-                  <Link to="/login">Login</Link>
+                  <Link to="/login">
+                    {intl.formatMessage({ id: "nav.login" })}
+                  </Link>
                 </Button>
-                <Button
-                  onClick={toggleMenu}
-                  className="w-full"
-                  asChild
-                >
-                  <Link to="/register">Register</Link>
+                <Button onClick={toggleMenu} className="w-full" asChild>
+                  <Link to="/register">
+                    {intl.formatMessage({ id: "nav.register" })}
+                  </Link>
                 </Button>
               </div>
             )}
