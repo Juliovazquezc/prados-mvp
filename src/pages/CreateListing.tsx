@@ -15,7 +15,6 @@ import {
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import ImageUpload from "@/components/ImageUpload";
-import RequireAuth from "@/components/RequireAuth";
 import { Spinner } from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
@@ -93,7 +92,7 @@ const CreateListing = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm() || !user) return;
+    // if (!validateForm() || !user) return;
 
     setIsLoading(true);
 
@@ -132,124 +131,120 @@ const CreateListing = () => {
   };
 
   return (
-    <RequireAuth>
-      <div className="min-h-screen flex flex-col">
-        <Header />
+    <div className="min-h-screen flex flex-col">
+      <Header />
 
-        <main className="flex-grow marketplace-container pb-20">
-          <section className="py-6 max-w-2xl mx-auto">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-              Create Listing
-            </h1>
+      <main className="flex-grow marketplace-container pb-20">
+        <section className="py-6 max-w-2xl mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
+            Create Listing
+          </h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="What are you selling?"
-                  className={errors.title ? "border-red-500" : ""}
-                />
-                {errors.title && (
-                  <p className="text-red-500 text-sm">{errors.title}</p>
-                )}
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="What are you selling?"
+                className={errors.title ? "border-red-500" : ""}
+              />
+              {errors.title && (
+                <p className="text-red-500 text-sm">{errors.title}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your item or service..."
-                  rows={4}
-                  className={errors.description ? "border-red-500" : ""}
-                />
-                {errors.description && (
-                  <p className="text-red-500 text-sm">{errors.description}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your item or service..."
+                rows={4}
+                className={errors.description ? "border-red-500" : ""}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">{errors.description}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="price">Price ($)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0.00"
-                  className={errors.price ? "border-red-500" : ""}
-                />
-                {errors.price && (
-                  <p className="text-red-500 text-sm">{errors.price}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="price">Price ($)</Label>
+              <Input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                className={errors.price ? "border-red-500" : ""}
+              />
+              {errors.price && (
+                <p className="text-red-500 text-sm">{errors.price}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select
-                  value={category}
-                  onValueChange={(value) =>
-                    setCategory(value as ListingCategory)
-                  }
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={category}
+                onValueChange={(value) => setCategory(value as ListingCategory)}
+              >
+                <SelectTrigger
+                  className={errors.category ? "border-red-500" : ""}
                 >
-                  <SelectTrigger
-                    className={errors.category ? "border-red-500" : ""}
-                  >
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.category && (
-                  <p className="text-red-500 text-sm">{errors.category}</p>
-                )}
-              </div>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.category && (
+                <p className="text-red-500 text-sm">{errors.category}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label>Images</Label>
-                <ImageUpload
-                  images={images}
-                  setImages={setImages}
-                  maxImages={4}
-                />
-                {errors.images && (
-                  <p className="text-red-500 text-sm">{errors.images}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label>Images</Label>
+              <ImageUpload
+                images={images}
+                setImages={setImages}
+                maxImages={4}
+              />
+              {errors.images && (
+                <p className="text-red-500 text-sm">{errors.images}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Contact Phone</Label>
-                <Input
-                  id="phone"
-                  value={user?.phone || ""}
-                  disabled
-                  className="bg-gray-100"
-                />
-                <p className="text-sm text-gray-500">
-                  This number will be shown to interested buyers
-                </p>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Contact Phone</Label>
+              <Input
+                id="phone"
+                value={user?.phone || ""}
+                disabled
+                className="bg-gray-100"
+              />
+              <p className="text-sm text-gray-500">
+                This number will be shown to interested buyers
+              </p>
+            </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? <Spinner /> : "Create Listing"}
-              </Button>
-            </form>
-          </section>
-        </main>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? <Spinner /> : "Create Listing"}
+            </Button>
+          </form>
+        </section>
+      </main>
 
-        <BottomNavigation />
-      </div>
-    </RequireAuth>
+      <BottomNavigation />
+    </div>
   );
 };
 

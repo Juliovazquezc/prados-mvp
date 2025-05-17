@@ -13,7 +13,6 @@ import { ListingsProvider } from "./contexts/ListingsContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Suspense, type FC } from "react";
 import { I18nProvider } from "@/i18n/I18nProvider";
-import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 // Pages
 import { LoginForm } from "@/pages/LoginForm";
@@ -26,6 +25,7 @@ import NotFound from "./pages/NotFound";
 // Components
 import { LoadingSpinner } from "./components/ui/loading-spinner";
 import { ErrorFallback } from "./components/ui/error-fallback";
+import RequireAuth from "./components/auth/RequireAuth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,7 +70,7 @@ const App: FC = () => {
                           path={path}
                           element={
                             requiresAuth ? (
-                              <ProtectedRoute>{element}</ProtectedRoute>
+                              <RequireAuth>{element}</RequireAuth>
                             ) : (
                               element
                             )
