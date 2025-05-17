@@ -8,21 +8,17 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import { ListingsProvider } from "./contexts/ListingsContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Suspense, type FC } from "react";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { LoginForm } from "@/components/auth/LoginForm";
-import { SignUpForm } from "@/components/auth/SignUpForm";
-import { Layout } from "@/components/Layout";
 
 // Pages
+import { LoginForm } from "@/pages/LoginForm";
+import { SignUpForm } from "@/pages/SignUpForm";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
 import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
 import Search from "./pages/Search";
@@ -51,7 +47,6 @@ const routes: RouteConfig[] = [
   { path: "/", element: <Index /> },
   { path: "/login", element: <LoginForm /> },
   { path: "/register", element: <SignUpForm /> },
-  { path: "/profile", element: <Profile />, requiresAuth: true },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail /> },
   { path: "/search", element: <Search /> },

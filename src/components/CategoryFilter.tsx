@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { CATEGORIES } from "@/contexts/ListingsContext";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,7 @@ const CategoryFilter = ({
         >
           All
         </Button>
-        
+
         {CATEGORIES.map((category) => (
           <Button
             key={category}
