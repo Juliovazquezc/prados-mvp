@@ -24,7 +24,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-4">
+        <nav className="hidden lg:flex items-center space-x-4">
           <Link to="/" className="text-gray-700 hover:text-marketplace-primary">
             {intl.formatMessage({ id: "nav.home" })}
           </Link>
@@ -71,81 +71,87 @@ const Header = () => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden flex items-center gap-2">
+        <div className="lg:hidden flex items-center gap-2">
           <LanguageSwitcher />
-          <button onClick={toggleMenu}>
+          <button
+            onClick={toggleMenu}
+            className="p-2 transition-transform duration-200 ease-in-out hover:scale-110"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200 shadow-md">
-          <div className="flex flex-col p-4 space-y-3">
-            <Link
-              to="/"
-              className="p-2 hover:bg-gray-100 rounded-md"
-              onClick={toggleMenu}
-            >
-              {intl.formatMessage({ id: "nav.home" })}
-            </Link>
-            <Link
-              to="/search"
-              className="p-2 hover:bg-gray-100 rounded-md"
-              onClick={toggleMenu}
-            >
-              {intl.formatMessage({ id: "nav.search" })}
-            </Link>
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/create"
-                  className="p-2 hover:bg-gray-100 rounded-md"
-                  onClick={toggleMenu}
-                >
-                  {intl.formatMessage({ id: "app.createListing" })}
+      <div
+        className={`lg:hidden fixed inset-x-0 top-16 bg-white border-b border-gray-200 shadow-md transform transition-all duration-300 ease-in-out ${
+          isMenuOpen
+            ? "translate-y-0 opacity-100 pointer-events-auto visible"
+            : "-translate-y-full opacity-0 pointer-events-none invisible"
+        }`}
+      >
+        <div className="flex flex-col p-4 space-y-3">
+          <Link
+            to="/"
+            className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+            onClick={toggleMenu}
+          >
+            {intl.formatMessage({ id: "nav.home" })}
+          </Link>
+
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/create"
+                className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                onClick={toggleMenu}
+              >
+                {intl.formatMessage({ id: "app.createListing" })}
+              </Link>
+              <Link
+                to="/profile"
+                className="p-2 hover:bg-gray-100 rounded-md transition-colors duration-200"
+                onClick={toggleMenu}
+              >
+                {intl.formatMessage({ id: "nav.profile" })}
+              </Link>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  signOut();
+                  toggleMenu();
+                }}
+                className="justify-start transition-colors duration-200"
+              >
+                {intl.formatMessage({ id: "nav.logout" })}
+              </Button>
+            </>
+          ) : (
+            <div className="flex flex-col space-y-2">
+              <Button
+                variant="outline"
+                onClick={toggleMenu}
+                className="w-full transition-colors duration-200"
+                asChild
+              >
+                <Link to="/login">
+                  {intl.formatMessage({ id: "nav.login" })}
                 </Link>
-                <Link
-                  to="/profile"
-                  className="p-2 hover:bg-gray-100 rounded-md"
-                  onClick={toggleMenu}
-                >
-                  {intl.formatMessage({ id: "nav.profile" })}
+              </Button>
+              <Button
+                onClick={toggleMenu}
+                className="w-full transition-colors duration-200"
+                asChild
+              >
+                <Link to="/register">
+                  {intl.formatMessage({ id: "nav.register" })}
                 </Link>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    signOut();
-                    toggleMenu();
-                  }}
-                  className="justify-start"
-                >
-                  {intl.formatMessage({ id: "nav.logout" })}
-                </Button>
-              </>
-            ) : (
-              <div className="flex flex-col space-y-2">
-                <Button
-                  variant="outline"
-                  onClick={toggleMenu}
-                  className="w-full"
-                  asChild
-                >
-                  <Link to="/login">
-                    {intl.formatMessage({ id: "nav.login" })}
-                  </Link>
-                </Button>
-                <Button onClick={toggleMenu} className="w-full" asChild>
-                  <Link to="/register">
-                    {intl.formatMessage({ id: "nav.register" })}
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </div>
+              </Button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </header>
   );
 };

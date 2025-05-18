@@ -39,105 +39,108 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-grow marketplace-container pb-20">
-        <section className="py-6">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-              Prados MVP
-            </h1>
-            {isAuthenticated && (
-              <Button asChild>
-                <Link to="/create" className="flex items-center">
-                  <Plus size={18} className="mr-2" />
-                  <span className="hidden sm:inline">Create Listing</span>
-                  <span className="sm:hidden">Sell</span>
-                </Link>
-              </Button>
-            )}
-          </div>
-
-          <div className="mb-6">
-            <div className="relative">
-              <Search
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <Input
-                type="text"
-                placeholder="Search listings..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto pb-4 mb-4">
-            <Button
-              variant={selectedCategory === "All" ? "default" : "outline"}
-              onClick={() => setSelectedCategory("All")}
-              className="whitespace-nowrap"
-            >
-              All
-            </Button>
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category)}
-                className="whitespace-nowrap"
-              >
-                {category}
-              </Button>
-            ))}
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center my-12">
-              <Spinner />
-            </div>
-          ) : filteredPosts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredPosts.map((post) => (
-                <Link
-                  key={post.id}
-                  to={`/listings/${post.id}`}
-                  className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200"
-                >
-                  <div className="aspect-square relative overflow-hidden bg-gray-100">
-                    {post.images[0] && (
-                      <img
-                        src={post.images[0]}
-                        alt={post.title}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-800 mb-1 line-clamp-1">
-                      {post.title}
-                    </h3>
-                    <p className="text-green-600 font-medium">
-                      {formatPrice(post.price)}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                      {post.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center my-12">
-              <p className="text-gray-500 mb-4">No listings found</p>
+      <main className="flex-grow w-full">
+        <div className="max-w-7xl mx-auto">
+          <section className="py-4 px-2 sm:px-4 md:px-6 lg:px-8">
+            <div className="flex justify-between items-center mb-4">
               {isAuthenticated && (
-                <Button asChild>
-                  <Link to="/create">Create a listing</Link>
+                <Button size="sm" className="sm:h-10" asChild>
+                  <Link to="/create" className="flex items-center">
+                    <Plus size={16} className="mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Create Listing</span>
+                    <span className="sm:hidden">Sell</span>
+                  </Link>
                 </Button>
               )}
             </div>
-          )}
-        </section>
+
+            <div className="mb-4">
+              <div className="relative">
+                <Search
+                  className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  size={16}
+                />
+                <Input
+                  type="text"
+                  placeholder="Search listings..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+              <Button
+                variant={selectedCategory === "All" ? "default" : "outline"}
+                onClick={() => setSelectedCategory("All")}
+                className="whitespace-nowrap text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+                size="sm"
+              >
+                All
+              </Button>
+              {categories.map((category) => (
+                <Button
+                  key={category}
+                  variant={
+                    selectedCategory === category ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedCategory(category)}
+                  className="whitespace-nowrap text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+                  size="sm"
+                >
+                  {category}
+                </Button>
+              ))}
+            </div>
+
+            {isLoading ? (
+              <div className="flex justify-center my-12">
+                <Spinner />
+              </div>
+            ) : filteredPosts.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                {filteredPosts.map((post) => (
+                  <Link
+                    key={post.id}
+                    to={`/listings/${post.id}`}
+                    className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200"
+                  >
+                    <div className="aspect-square relative overflow-hidden bg-gray-100">
+                      {post.images[0] && (
+                        <img
+                          src={post.images[0]}
+                          alt={post.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      )}
+                    </div>
+                    <div className="p-2 sm:p-3">
+                      <h3 className="font-medium text-gray-800 mb-0.5 line-clamp-1 text-xs sm:text-sm">
+                        {post.title}
+                      </h3>
+                      <p className="text-green-600 font-semibold text-xs sm:text-sm">
+                        {formatPrice(post.price)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 hidden sm:block">
+                        {post.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center my-12">
+                <p className="text-gray-500 mb-4">No listings found</p>
+                {isAuthenticated && (
+                  <Button asChild>
+                    <Link to="/create">Create a listing</Link>
+                  </Button>
+                )}
+              </div>
+            )}
+          </section>
+        </div>
       </main>
 
       <BottomNavigation />

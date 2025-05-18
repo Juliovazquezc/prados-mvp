@@ -15,8 +15,8 @@ import { Suspense, type FC } from "react";
 import { I18nProvider } from "@/i18n/I18nProvider";
 
 // Pages
-import { LoginForm } from "@/pages/LoginForm";
-import { SignUpForm } from "@/pages/SignUpForm";
+import { LoginForm } from "@/pages/Login";
+import { SignUpForm } from "@/pages/Register";
 import Index from "./pages/Index";
 import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
