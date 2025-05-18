@@ -26,6 +26,7 @@ import {
 import { Post } from "@/types/database.types";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { supabase } from "@/lib/supabase";
+import ImageViewer from "@/components/ImageViewer";
 
 interface Profile {
   id: string;
@@ -49,6 +50,7 @@ const ListingDetail = () => {
   const [currentImage, setCurrentImage] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,15 +134,11 @@ const ListingDetail = () => {
   const wasUpdated = created_at !== updated_at;
 
   const nextImage = () => {
-    if (currentImage < images.length - 1) {
-      setCurrentImage(currentImage + 1);
-    }
+    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const prevImage = () => {
-    if (currentImage > 0) {
-      setCurrentImage(currentImage - 1);
-    }
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const handleDeleteListing = async () => {
@@ -206,22 +204,29 @@ const ListingDetail = () => {
                 <img
                   src={images[currentImage] || "/placeholder.svg"}
                   alt={title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain cursor-pointer"
+                  onClick={() => setIsImageViewerOpen(true)}
                 />
 
                 {images.length > 1 && (
                   <>
                     <button
-                      onClick={prevImage}
-                      disabled={currentImage === 0}
-                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 disabled:opacity-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        prevImage();
+                      }}
+                      className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 hover:bg-opacity-100 transition-all"
+                      aria-label="Previous image"
                     >
                       <ChevronLeft size={20} />
                     </button>
                     <button
-                      onClick={nextImage}
-                      disabled={currentImage === images.length - 1}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 disabled:opacity-50"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        nextImage();
+                      }}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 hover:bg-opacity-100 transition-all"
+                      aria-label="Next image"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -230,15 +235,15 @@ const ListingDetail = () => {
               </div>
 
               {images.length > 1 && (
-                <div className="flex mt-4 space-x-2 overflow-x-auto">
+                <div className="flex mt-4 space-x-2 overflow-x-auto pb-2">
                   {images.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setCurrentImage(idx)}
-                      className={`w-20 h-20 rounded-md overflow-hidden border-2 ${
+                      className={`relative flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${
                         idx === currentImage
                           ? "border-marketplace-primary"
-                          : "border-transparent"
+                          : "border-transparent hover:border-marketplace-primary/50"
                       }`}
                     >
                       <img
@@ -309,6 +314,16 @@ const ListingDetail = () => {
             </div>
           </div>
         </section>
+
+        {/* Image Viewer Modal */}
+        <ImageViewer
+          images={images}
+          currentImage={currentImage}
+          isOpen={isImageViewerOpen}
+          onClose={() => setIsImageViewerOpen(false)}
+          onNext={nextImage}
+          onPrev={prevImage}
+        />
       </main>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
