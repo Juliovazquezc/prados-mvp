@@ -2,11 +2,22 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 
+type UserMetadata = {
+  full_name: string;
+  street: string;
+  house_number: string;
+  phone_number: string;
+};
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    metadata: UserMetadata
+  ) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -42,25 +53,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string) => {
-    // Sign up with auto-confirm enabled
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          // You can add additional user metadata here if needed
-        },
-      },
-    });
-    if (signUpError) throw signUpError;
+  const signUp = async (
+    email: string,
+    password: string,
+    metadata: UserMetadata
+  ) => {
+    try {
+      // Sign up the user
+      const { data: authData, error: signUpError } = await supabase.auth.signUp(
+        {
+          email,
+          password,
+        }
+      );
 
-    // Automatically sign in after signup
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (signInError) throw signInError;
+      if (signUpError) throw signUpError;
+      if (!authData.user) throw new Error("No user data returned from signup");
+
+      // Create the user profile
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: authData.user.id,
+        full_name: metadata.full_name,
+        street: metadata.street,
+        house_number: metadata.house_number,
+        phone_number: metadata.phone_number,
+      });
+
+      if (profileError) {
+        // If profile creation fails, we should delete the auth user
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        throw profileError;
+      }
+
+      // Automatically sign in after signup
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw signInError;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const signOut = async () => {

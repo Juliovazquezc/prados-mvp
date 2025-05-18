@@ -134,7 +134,7 @@ const CreateListing = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-grow marketplace-container pb-20">
+      <main className="flex-grow marketplace-container pb-20 mx-0 md:mx-auto">
         <section className="py-6 max-w-2xl mx-auto">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
             Create Listing
@@ -221,19 +221,6 @@ const CreateListing = () => {
               {errors.images && (
                 <p className="text-red-500 text-sm">{errors.images}</p>
               )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">Contact Phone</Label>
-              <Input
-                id="phone"
-                value={user?.phone || ""}
-                disabled
-                className="bg-gray-100"
-              />
-              <p className="text-sm text-gray-500">
-                This number will be shown to interested buyers
-              </p>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

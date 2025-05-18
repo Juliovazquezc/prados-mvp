@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, X } from "lucide-react";
 import { useIntl } from "react-intl";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -37,17 +36,11 @@ const Header = () => {
               >
                 {intl.formatMessage({ id: "app.createListing.short" })}
               </Link>
-              <div className="flex items-center ml-4">
-                <Link to="/profile" className="flex items-center">
-                  <Avatar className="h-8 w-8">
-                    {/* <AvatarImage src={user?.profileImage} /> */}
-                    <AvatarFallback></AvatarFallback>
-                  </Avatar>
-                </Link>
+              <div className="flex items-center">
                 <Button
-                  variant="ghost"
+                  // variant="ghost"
                   onClick={signOut}
-                  className="text-sm ml-4"
+                  className="text-sm "
                 >
                   {intl.formatMessage({ id: "nav.logout" })}
                 </Button>
