@@ -62,16 +62,16 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom marketplace colors
+        // Custom marketplace colors based on Los Prados logo
         marketplace: {
-          primary: "#9b87f5",
-          secondary: "#7E69AB",
-          peach: "#FDE1D3",
-          yellow: "#FEF7CD",
-          orange: "#FEC6A1",
-          pink: "#FFDEE2",
-          light: "#F1F1F1",
-          neutral: "#8E9196",
+          primary: "#E6531B", // Naranja principal (Los Prados)
+          secondary: "#56C3C2", // Verde agua (Residencial)
+          accent: "#B3BF3E", // Verde claro (líneas decorativas)
+          light: "#F8F9FA", // Fondo claro
+          neutral: "#6B7280", // Texto neutral
+          "primary-light": "#F9E3DC", // Versión clara del naranja para fondos
+          "secondary-light": "#E5F5F5", // Versión clara del verde agua para fondos
+          "accent-light": "#F3F5E5", // Versión clara del verde para fondos
         },
       },
       borderRadius: {
