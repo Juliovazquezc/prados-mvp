@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useIntl } from "react-intl";
-import LanguageSwitcher from "./LanguageSwitcher";
+// import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
   const { isAuthenticated, signOut } = useAuth();
@@ -71,12 +71,12 @@ const Header = () => {
               </Button>
             </div>
           )}
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
         </nav>
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden flex items-center gap-2">
-          <LanguageSwitcher />
+          {/* <LanguageSwitcher /> */}
           <button
             onClick={toggleMenu}
             className="p-2 text-marketplace-neutral hover:text-marketplace-primary transition-transform duration-200 ease-in-out hover:scale-110"

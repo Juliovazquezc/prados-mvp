@@ -11,14 +11,14 @@ import { supabase } from "@/lib/supabase";
 import { Post } from "@/types/database.types";
 
 export const CATEGORIES = [
-  "Electronics",
-  "Furniture",
-  "Clothing",
-  "Books",
-  "Sports",
-  "Tools",
-  "Vehicles",
-  "Other",
+  "Electrónicos",
+  "Muebles",
+  "Ropa",
+  "Libros",
+  "Deportes",
+  "Herramientas",
+  "Vehículos",
+  "Otros",
 ] as const;
 
 export type ListingCategory = (typeof CATEGORIES)[number];
@@ -31,7 +31,7 @@ type ListingsContextType = {
   getListingById: (id: string) => Promise<Post | null>;
   deleteListing: (id: string) => Promise<void>;
   searchListings: (query: string) => Post[];
-  filterListingsByCategory: (category: ListingCategory | "All") => Post[];
+  filterListingsByCategory: (category: ListingCategory | "Todos") => Post[];
   refreshListings: () => Promise<void>;
 };
 
@@ -164,9 +164,9 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const filterListingsByCategory = (
-    category: ListingCategory | "All"
+    category: ListingCategory | "Todos"
   ): Post[] => {
-    if (category === "All") return listings;
+    if (category === "Todos") return listings;
     return listings.filter(
       (listing) =>
         Array.isArray(listing.category) && listing.category.includes(category)

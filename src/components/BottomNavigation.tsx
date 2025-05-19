@@ -1,4 +1,4 @@
-import { Home, Plus } from "lucide-react";
+import { Home, Plus, FileText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const BottomNavigation = () => {
@@ -17,6 +17,13 @@ const BottomNavigation = () => {
       >
         <Plus size={20} />
         <span>Vender</span>
+      </Link>
+      <Link
+        to="/disclaimer"
+        className={`nav-item ${path === "/disclaimer" ? "active" : ""}`}
+      >
+        <FileText size={20} />
+        <span>Aviso</span>
       </Link>
     </nav>
   );

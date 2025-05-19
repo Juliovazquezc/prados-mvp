@@ -179,7 +179,7 @@ const CreateListing = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe tu artículo o servicio..."
-                rows={4}
+                rows={7}
                 className={errors.description ? "border-red-500" : ""}
               />
               {errors.description && (

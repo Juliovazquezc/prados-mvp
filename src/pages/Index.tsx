@@ -13,15 +13,15 @@ const Index = () => {
   const { isAuthenticated } = useAuth();
   const { listings, isLoading, categories } = useListings();
   const [selectedCategory, setSelectedCategory] = useState<
-    (typeof categories)[number] | "All"
-  >("All");
+    (typeof categories)[number] | "Todos"
+  >("Todos");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter posts by category and search query
   const filteredPosts = listings
     .filter(
       (post) =>
-        selectedCategory === "All" ||
+        selectedCategory === "Todos" ||
         (Array.isArray(post.category) &&
           post.category.includes(selectedCategory))
     )
@@ -75,8 +75,8 @@ const Index = () => {
 
             <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
               <Button
-                variant={selectedCategory === "All" ? "default" : "outline"}
-                onClick={() => setSelectedCategory("All")}
+                variant={selectedCategory === "Todos" ? "default" : "outline"}
+                onClick={() => setSelectedCategory("Todos")}
                 className="whitespace-nowrap text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
                 size="sm"
               >

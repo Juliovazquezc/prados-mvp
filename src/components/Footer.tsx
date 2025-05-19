@@ -1,9 +1,16 @@
 import { type FC } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Footer: FC = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <footer className="bg-gray-50 border-t border-gray-200">
+    <footer
+      className={`bg-gray-50 border-t border-gray-200 ${
+        isAuthenticated ? "hidden md:block" : "block"
+      }`}
+    >
       <div className="marketplace-container py-4">
         <div className="text-center">
           <p className="text-sm text-gray-600 max-w-3xl mx-auto">

@@ -1,11 +1,15 @@
 import { type FC } from "react";
 import Header from "@/components/Header";
+import BottomNavigation from "@/components/BottomNavigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Disclaimer: FC = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1 marketplace-container py-8">
+      <main className="flex-1 marketplace-container pt-8">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-6">
             Aviso de Privacidad y Responsabilidad
@@ -86,6 +90,7 @@ const Disclaimer: FC = () => {
           </div>
         </div>
       </main>
+      {isAuthenticated && <BottomNavigation />}
     </div>
   );
 };

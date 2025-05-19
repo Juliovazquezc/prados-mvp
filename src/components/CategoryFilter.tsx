@@ -15,9 +15,9 @@ const CategoryFilter = ({
     <div className="overflow-x-auto py-4">
       <div className="flex space-x-2 min-w-max">
         <Button
-          variant={selectedCategory === "All" ? "default" : "outline"}
+          variant={selectedCategory === "Todos" ? "default" : "outline"}
           size="sm"
-          onClick={() => onSelectCategory("All")}
+          onClick={() => onSelectCategory("Todos")}
           className="rounded-full"
         >
           Todos

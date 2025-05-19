@@ -294,7 +294,7 @@ const ListingDetail = () => {
 
               <div className="border-t border-gray-200 pt-6">
                 <h2 className="text-xl font-semibold mb-3">Descripción</h2>
-                <p className="text-gray-700 whitespace-pre-line">
+                <p className="text-gray-700 whitespace-pre-wrap text-lg leading-relaxed">
                   {description}
                 </p>
               </div>
