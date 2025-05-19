@@ -8,30 +8,19 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Post } from "@/types/database.types";
+import { Post, Database } from "@/types/database.types";
 
-export const CATEGORIES = [
-  "Electrónicos",
-  "Muebles",
-  "Ropa",
-  "Libros",
-  "Deportes",
-  "Herramientas",
-  "Vehículos",
-  "Otros",
-] as const;
-
-export type ListingCategory = (typeof CATEGORIES)[number];
+type Category = Database["public"]["Tables"]["categories"]["Row"];
 
 type ListingsContextType = {
   listings: Post[];
   userListings: Post[];
   isLoading: boolean;
-  categories: typeof CATEGORIES;
+  categories: string[];
   getListingById: (id: string) => Promise<Post | null>;
   deleteListing: (id: string) => Promise<void>;
   searchListings: (query: string) => Post[];
-  filterListingsByCategory: (category: ListingCategory | "Todos") => Post[];
+  filterListingsByCategory: (category: string | "Todos") => Post[];
   refreshListings: () => Promise<void>;
 };
 
@@ -47,15 +36,44 @@ type CachedPost = {
   timestamp: number;
 };
 
+const postCache = new Map<string, CachedPost>();
+
+export const useListings = () => {
+  const context = useContext(ListingsContext);
+  if (!context) {
+    throw new Error("useListings must be used within a ListingsProvider");
+  }
+  return context;
+};
+
 export const ListingsProvider = ({ children }: { children: ReactNode }) => {
-  const [listings, setListings] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [postCache, setPostCache] = useState<Record<string, CachedPost>>({});
   const { user } = useAuth();
+  const [listings, setListings] = useState<Post[]>([]);
+  const [userListings, setUserListings] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("categories")
+        .select("name")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        return;
+      }
+
+      setCategories(data.map((cat) => cat.name));
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchListings = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from("posts")
         .select("*")
@@ -63,39 +81,43 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      // Update cache with fresh data
+      // Update cache with new data
+      const now = Date.now();
       const newCache: Record<string, CachedPost> = {};
       data?.forEach((post) => {
         newCache[post.id] = {
           data: post,
-          timestamp: Date.now(),
+          timestamp: now,
         };
       });
-      setPostCache(newCache);
+      postCache.clear();
+      for (const [id, cachedPost] of Object.entries(newCache)) {
+        postCache.set(id, cachedPost);
+      }
       setListings(data || []);
+
+      // Update user listings
+      if (user) {
+        const userPosts =
+          data?.filter((post) => post.user_id === user.id) || [];
+        setUserListings(userPosts);
+      } else {
+        setUserListings([]);
+      }
     } catch (error) {
       console.error("Error fetching listings:", error);
-      toast.error("Failed to load listings");
+      toast.error("Error fetching listings. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchListings();
-  }, []);
-
-  const userListings = listings.filter(
-    (listing) => user && listing.user_id === user.id
-  );
-
-  const getListingById = async (id: string) => {
+  const getListingById = async (id: string): Promise<Post | null> => {
     try {
       // Check cache first
-      const cachedPost = postCache[id];
+      const cachedPost = postCache.get(id);
       const now = Date.now();
 
-      // If we have a valid cached post that hasn't expired
       if (cachedPost && now - cachedPost.timestamp < CACHE_EXPIRY_TIME) {
         return cachedPost.data;
       }
@@ -111,61 +133,51 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
 
       // Update cache with new data
       if (data) {
-        setPostCache((prev) => ({
-          ...prev,
-          [id]: {
-            data,
-            timestamp: now,
-          },
-        }));
+        postCache.set(id, {
+          data,
+          timestamp: now,
+        });
       }
 
       return data;
     } catch (error) {
       console.error("Error fetching listing:", error);
-      toast.error("Failed to load listing");
       return null;
     }
   };
 
-  const deleteListing = async (id: string): Promise<void> => {
+  const deleteListing = async (id: string) => {
     try {
       const { error } = await supabase.from("posts").delete().eq("id", id);
 
       if (error) throw error;
 
-      // Update listings state and cache
+      // Update local state
       setListings((prevListings) =>
         prevListings.filter((listing) => listing.id !== id)
       );
-      setPostCache((prev) => {
-        const newCache = { ...prev };
-        delete newCache[id];
-        return newCache;
-      });
+      setUserListings((prevListings) =>
+        prevListings.filter((listing) => listing.id !== id)
+      );
+      postCache.delete(id);
 
       toast.success("Listing deleted successfully");
     } catch (error) {
       console.error("Error deleting listing:", error);
-      toast.error("Failed to delete listing");
-      throw error;
+      toast.error("Error deleting listing. Please try again.");
     }
   };
 
   const searchListings = (query: string): Post[] => {
-    if (!query) return listings;
-
-    const lowercaseQuery = query.toLowerCase();
+    const searchTerm = query.toLowerCase();
     return listings.filter(
       (listing) =>
-        listing.title.toLowerCase().includes(lowercaseQuery) ||
-        listing.description.toLowerCase().includes(lowercaseQuery)
+        listing.title.toLowerCase().includes(searchTerm) ||
+        listing.description.toLowerCase().includes(searchTerm)
     );
   };
 
-  const filterListingsByCategory = (
-    category: ListingCategory | "Todos"
-  ): Post[] => {
+  const filterListingsByCategory = (category: string | "Todos"): Post[] => {
     if (category === "Todos") return listings;
     return listings.filter(
       (listing) =>
@@ -173,13 +185,18 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  useEffect(() => {
+    fetchCategories();
+    fetchListings();
+  }, [user]);
+
   return (
     <ListingsContext.Provider
       value={{
         listings,
         userListings,
         isLoading,
-        categories: CATEGORIES,
+        categories,
         getListingById,
         deleteListing,
         searchListings,
@@ -190,12 +207,4 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </ListingsContext.Provider>
   );
-};
-
-export const useListings = () => {
-  const context = useContext(ListingsContext);
-  if (context === undefined) {
-    throw new Error("useListings must be used within a ListingsProvider");
-  }
-  return context;
 };

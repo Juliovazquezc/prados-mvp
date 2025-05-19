@@ -1,8 +1,15 @@
+type SpinnerProps = {
+  className?: string;
+};
 
-export const Spinner = () => {
+export const Spinner = ({ className }: SpinnerProps) => {
   return (
     <div className="flex justify-center items-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-marketplace-primary"></div>
+      <div
+        className={`animate-spin rounded-full h-8 w-8 border-b-2 border-marketplace-primary ${
+          className || ""
+        }`}
+      ></div>
     </div>
   );
 };

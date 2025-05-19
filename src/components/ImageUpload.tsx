@@ -7,12 +7,14 @@ type ImageUploadProps = {
   images: string[];
   setImages: (images: string[]) => void;
   maxImages?: number;
+  error?: string;
 };
 
 const ImageUpload = ({
   images,
   setImages,
   maxImages = 4,
+  error,
 }: ImageUploadProps) => {
   const intl = useIntl();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,11 +115,21 @@ const ImageUpload = ({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="aspect-square flex flex-col items-center justify-center rounded-md border-2 border-dashed border-gray-300 hover:border-marketplace-primary bg-gray-50 hover:bg-gray-100 transition-colors p-4"
+            className={`aspect-square flex flex-col items-center justify-center rounded-md border-2 border-dashed ${
+              error
+                ? "border-red-500"
+                : "border-gray-300 hover:border-marketplace-primary"
+            } bg-gray-50 hover:bg-gray-100 transition-colors p-4`}
             aria-label={intl.formatMessage({ id: "imageUpload.addImage" })}
           >
-            <Plus className="h-6 w-6 text-gray-600" />
-            <span className="text-sm mt-1 text-gray-600">
+            <Plus
+              className={`h-6 w-6 ${error ? "text-red-500" : "text-gray-600"}`}
+            />
+            <span
+              className={`text-sm mt-1 ${
+                error ? "text-red-500" : "text-gray-600"
+              }`}
+            >
               {intl.formatMessage({ id: "imageUpload.addImage" })}
             </span>
           </button>
@@ -143,6 +155,7 @@ const ImageUpload = ({
           }
         )}
       </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
   );
 };

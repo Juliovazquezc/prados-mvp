@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useListings } from "@/contexts/ListingsContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,23 +13,9 @@ import { Spinner } from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
-import { useListings } from "@/contexts/ListingsContext";
-
-export const CATEGORIES = [
-  "Electrónicos",
-  "Muebles",
-  "Ropa",
-  "Libros",
-  "Deportes",
-  "Herramientas",
-  "Vehículos",
-  "Otros",
-] as const;
-
-export type ListingCategory = (typeof CATEGORIES)[number];
 
 const CreateListing = () => {
-  const { refreshListings } = useListings();
+  const { refreshListings, categories } = useListings();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -36,7 +23,7 @@ const CreateListing = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
-  const [categories, setCategories] = useState<ListingCategory[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
@@ -67,7 +54,7 @@ const CreateListing = () => {
     if (!price) newErrors.price = "El precio es requerido";
     if (parseFloat(price) < 0)
       newErrors.price = "El precio no puede ser negativo";
-    if (categories.length === 0)
+    if (selectedCategories.length === 0)
       newErrors.category = "Se requiere al menos una categoría";
     if (images.length === 0)
       newErrors.images = "Se requiere al menos una imagen";
@@ -85,7 +72,7 @@ const CreateListing = () => {
       const { error: uploadError } = await supabase.storage
         .from("post-images")
         .upload(fileName, blob, {
-          contentType: blob.type, // Use the blob's content type
+          contentType: blob.type,
           upsert: false,
         });
 
@@ -124,7 +111,7 @@ const CreateListing = () => {
           title,
           description,
           price: parseFloat(price),
-          category: categories,
+          category: selectedCategories,
           images: imageUrls,
           user_id: user.id,
         })
@@ -222,13 +209,13 @@ const CreateListing = () => {
                       setShowCategoryDropdown((prev) => !prev);
                   }}
                 >
-                  {categories.length === 0 ? (
+                  {selectedCategories.length === 0 ? (
                     <span className="text-gray-400">
                       Seleccionar categorías
                     </span>
                   ) : (
                     <div className="flex flex-wrap gap-1">
-                      {categories.map((cat) => (
+                      {selectedCategories.map((cat) => (
                         <span
                           key={cat}
                           className="bg-marketplace-primary text-white px-2 py-0.5 rounded-full text-xs flex items-center gap-1 border border-marketplace-primary shadow-sm"
@@ -241,15 +228,15 @@ const CreateListing = () => {
                             tabIndex={0}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setCategories(
-                                categories.filter((c) => c !== cat)
+                              setSelectedCategories(
+                                selectedCategories.filter((c) => c !== cat)
                               );
                             }}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" || e.key === " ") {
                                 e.stopPropagation();
-                                setCategories(
-                                  categories.filter((c) => c !== cat)
+                                setSelectedCategories(
+                                  selectedCategories.filter((c) => c !== cat)
                                 );
                               }
                             }}
@@ -266,15 +253,15 @@ const CreateListing = () => {
                     className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
                     role="listbox"
                   >
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <li
                         key={cat}
                         className="flex items-center px-3 py-2 cursor-pointer hover:bg-marketplace-primary/10"
                         role="option"
-                        aria-selected={categories.includes(cat)}
+                        aria-selected={selectedCategories.includes(cat)}
                         tabIndex={0}
                         onClick={() => {
-                          setCategories((prev) =>
+                          setSelectedCategories((prev) =>
                             prev.includes(cat)
                               ? prev.filter((c) => c !== cat)
                               : [...prev, cat]
@@ -282,7 +269,7 @@ const CreateListing = () => {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ") {
-                            setCategories((prev) =>
+                            setSelectedCategories((prev) =>
                               prev.includes(cat)
                                 ? prev.filter((c) => c !== cat)
                                 : [...prev, cat]
@@ -292,7 +279,7 @@ const CreateListing = () => {
                       >
                         <input
                           type="checkbox"
-                          checked={categories.includes(cat)}
+                          checked={selectedCategories.includes(cat)}
                           readOnly
                           className="mr-2"
                           tabIndex={-1}
@@ -313,15 +300,14 @@ const CreateListing = () => {
               <ImageUpload
                 images={images}
                 setImages={setImages}
-                maxImages={4}
+                maxImages={5}
+                error={errors.images}
               />
-              {errors.images && (
-                <p className="text-red-500 text-sm">{errors.images}</p>
-              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? <Spinner /> : "Crear Anuncio"}
+              {isLoading ? <Spinner className="mr-2" /> : null}
+              Crear Anuncio
             </Button>
           </form>
         </section>
