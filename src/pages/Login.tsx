@@ -28,15 +28,16 @@ export const LoginForm = () => {
     try {
       await signIn(email, password);
       toast({
-        title: "Success",
-        description: "You have been logged in successfully.",
+        title: "Éxito",
+        description: "Has iniciado sesión correctamente.",
       });
       navigate("/"); // Redirect to homepage after successful login
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to login",
+        description:
+          error instanceof Error ? error.message : "Error al iniciar sesión",
       });
     } finally {
       setIsLoading(false);
@@ -44,14 +45,14 @@ export const LoginForm = () => {
   };
 
   return (
-    <>
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col">
       <Header />
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="flex-1 flex items-center justify-center px-4 -mt-16">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Login</CardTitle>
+            <CardTitle>Iniciar Sesión</CardTitle>
             <CardDescription>
-              Enter your email and password to login
+              Ingresa tu correo y contraseña para iniciar sesión
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -59,7 +60,7 @@ export const LoginForm = () => {
               <div className="space-y-2">
                 <Input
                   type="email"
-                  placeholder="Email"
+                  placeholder="Correo electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -69,7 +70,7 @@ export const LoginForm = () => {
               <div className="space-y-2">
                 <Input
                   type="password"
-                  placeholder="Password"
+                  placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -77,12 +78,12 @@ export const LoginForm = () => {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
             </form>
           </CardContent>
         </Card>
       </div>
-    </>
+    </div>
   );
 };

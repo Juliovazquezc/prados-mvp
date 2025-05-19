@@ -167,7 +167,10 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
     category: ListingCategory | "All"
   ): Post[] => {
     if (category === "All") return listings;
-    return listings.filter((listing) => listing.category === category);
+    return listings.filter(
+      (listing) =>
+        Array.isArray(listing.category) && listing.category.includes(category)
+    );
   };
 
   return (

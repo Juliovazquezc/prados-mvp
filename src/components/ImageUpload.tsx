@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Plus, X } from "lucide-react";
 import { useIntl } from "react-intl";
+import imageCompression from "browser-image-compression";
 
 type ImageUploadProps = {
   images: string[];
@@ -16,13 +17,53 @@ const ImageUpload = ({
   const intl = useIntl();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = async (file: File) => {
+    const options = {
+      maxSizeMB: 0.5, // Reducido a 500KB máximo
+      maxWidthOrHeight: 1280, // Reducido a 1280px máximo
+      useWebWorker: true,
+      fileType: file.type,
+      initialQuality: 0.7, // 70% de calidad inicial
+      alwaysKeepResolution: false, // Permite reducir la resolución si es necesario
+      preserveExif: false, // No preservar metadata EXIF para reducir tamaño
+      strict: true, // Fuerza el tamaño máximo
+    };
+
+    try {
+      let compressedFile = await imageCompression(file, options);
+
+      // Si el archivo sigue siendo muy grande, intentamos una segunda pasada con calidad más baja
+      if (compressedFile.size > 500000) {
+        // Si es mayor a 500KB
+        const secondPassOptions = {
+          ...options,
+          maxSizeMB: 0.3, // 300KB
+          initialQuality: 0.5, // 50% de calidad
+          maxWidthOrHeight: 1024, // 1024px máximo
+        };
+        compressedFile = await imageCompression(
+          compressedFile,
+          secondPassOptions
+        );
+      }
+
+      return URL.createObjectURL(compressedFile);
+    } catch (error) {
+      console.error("Error comprimiendo imagen:", error);
+      // Si hay un error en la compresión, devolvemos la imagen original
+      return URL.createObjectURL(file);
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = event.target.files;
     if (!files) return;
 
-    const newImages = Array.from(files).map((file) =>
-      URL.createObjectURL(file)
-    );
+    const compressPromises = Array.from(files).map(compressImage);
+    const newImages = await Promise.all(compressPromises);
+
     if (images.length + newImages.length <= maxImages) {
       setImages([...images, ...newImages]);
     }

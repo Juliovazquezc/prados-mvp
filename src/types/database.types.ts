@@ -15,7 +15,7 @@ export type Database = {
           title: string;
           description: string;
           price: number;
-          category: string;
+          category: string[];
           images: string[];
           user_id: string;
           created_at: string;
@@ -26,7 +26,7 @@ export type Database = {
           title: string;
           description: string;
           price: number;
-          category: string;
+          category: string[];
           images: string[];
           user_id: string;
           created_at?: string;
@@ -37,7 +37,7 @@ export type Database = {
           title?: string;
           description?: string;
           price?: number;
-          category?: string;
+          category?: string[];
           images?: string[];
           user_id?: string;
           created_at?: string;

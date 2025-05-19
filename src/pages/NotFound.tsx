@@ -1,4 +1,3 @@
-
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,18 +18,21 @@ const NotFound = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-grow flex flex-col justify-center items-center px-4">
-        <h1 className="text-5xl font-bold text-marketplace-primary mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-6">Oops! Page not found</p>
+        <h1 className="text-5xl font-bold text-marketplace-primary mb-4">
+          404
+        </h1>
+        <p className="text-xl text-gray-600 mb-6">¡Ups! Página no encontrada</p>
         <p className="text-gray-500 mb-8 text-center max-w-md">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+          La página que estás buscando puede haber sido eliminada, su nombre ha
+          cambiado o no está disponible temporalmente.
         </p>
         <Button asChild size="lg">
-          <Link to="/">Return to Home</Link>
+          <Link to="/">Volver al Inicio</Link>
         </Button>
       </main>
-      
+
       <BottomNavigation />
     </div>
   );

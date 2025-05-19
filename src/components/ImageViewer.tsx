@@ -46,13 +46,13 @@ const ImageViewer = ({
       className="fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
-      aria-label="Image viewer"
+      aria-label="Visor de imágenes"
     >
       {/* Close button */}
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-white hover:text-gray-300 z-50"
-        aria-label="Close image viewer"
+        aria-label="Cerrar visor de imágenes"
       >
         <X size={24} />
       </button>
@@ -61,7 +61,7 @@ const ImageViewer = ({
       <div className="relative w-full h-full flex items-center justify-center p-4">
         <img
           src={images[currentImage]}
-          alt={`Full size view ${currentImage + 1}`}
+          alt={`Vista completa ${currentImage + 1}`}
           className="max-h-full max-w-full object-contain"
         />
       </div>
@@ -72,14 +72,14 @@ const ImageViewer = ({
           <button
             onClick={onPrev}
             className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors"
-            aria-label="Previous image"
+            aria-label="Imagen anterior"
           >
             <ChevronLeft size={36} />
           </button>
           <button
             onClick={onNext}
             className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 transition-colors"
-            aria-label="Next image"
+            aria-label="Siguiente imagen"
           >
             <ChevronRight size={36} />
           </button>

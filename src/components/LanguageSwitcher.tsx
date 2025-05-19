@@ -14,7 +14,7 @@ const LanguageSwitcher = () => {
       variant="ghost"
       size="icon"
       onClick={toggleLanguage}
-      className="relative !-ml-1"
+      className="relative"
       aria-label={locale === "en" ? "Switch to Spanish" : "Cambiar a Inglés"}
     >
       <Languages className="h-5 w-5" />

@@ -9,14 +9,14 @@ const BottomNavigation = () => {
     <nav className="bottom-nav">
       <Link to="/" className={`nav-item ${path === "/" ? "active" : ""}`}>
         <Home size={20} />
-        <span>Home</span>
+        <span>Inicio</span>
       </Link>
       <Link
         to="/create"
         className={`nav-item ${path === "/create" ? "active" : ""}`}
       >
         <Plus size={20} />
-        <span>Sell</span>
+        <span>Vender</span>
       </Link>
     </nav>
   );

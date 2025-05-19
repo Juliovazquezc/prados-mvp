@@ -21,11 +21,13 @@ import Index from "./pages/Index";
 import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
 import NotFound from "./pages/NotFound";
+import Disclaimer from "./pages/Disclaimer";
 
 // Components
 import { LoadingSpinner } from "./components/ui/loading-spinner";
 import { ErrorFallback } from "./components/ui/error-fallback";
 import RequireAuth from "./components/auth/RequireAuth";
+import Footer from "./components/Footer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,11 +45,12 @@ type RouteConfig = {
 };
 
 const routes: RouteConfig[] = [
-  { path: "/", element: <Index /> },
+  { path: "/", element: <Index />, requiresAuth: true },
   { path: "/login", element: <LoginForm /> },
   { path: "/register", element: <SignUpForm /> },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
-  { path: "/listings/:id", element: <ListingDetail /> },
+  { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
+  { path: "/disclaimer", element: <Disclaimer /> },
   { path: "*", element: <NotFound /> },
 ];
 
@@ -59,31 +62,36 @@ const App: FC = () => {
           <AuthProvider>
             <ListingsProvider>
               <I18nProvider>
-                <Toaster />
-                <Sonner />
-                <Router>
-                  <Suspense fallback={<LoadingSpinner />}>
-                    <Routes>
-                      {routes.map(({ path, element, requiresAuth }) => (
-                        <Route
-                          key={path}
-                          path={path}
-                          element={
-                            requiresAuth ? (
-                              <RequireAuth>{element}</RequireAuth>
-                            ) : (
-                              element
-                            )
-                          }
-                        />
-                      ))}
-                      <Route
-                        path="/"
-                        element={<Navigate to="/dashboard" replace />}
-                      />
-                    </Routes>
-                  </Suspense>
-                </Router>
+                <div className="flex flex-col min-h-screen">
+                  <Toaster />
+                  <Sonner />
+                  <Router>
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <main className="flex-1">
+                        <Routes>
+                          {routes.map(({ path, element, requiresAuth }) => (
+                            <Route
+                              key={path}
+                              path={path}
+                              element={
+                                requiresAuth ? (
+                                  <RequireAuth>{element}</RequireAuth>
+                                ) : (
+                                  element
+                                )
+                              }
+                            />
+                          ))}
+                          <Route
+                            path="/"
+                            element={<Navigate to="/dashboard" replace />}
+                          />
+                        </Routes>
+                      </main>
+                    </Suspense>
+                    <Footer />
+                  </Router>
+                </div>
               </I18nProvider>
             </ListingsProvider>
           </AuthProvider>

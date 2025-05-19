@@ -20,7 +20,7 @@ const CategoryFilter = ({
           onClick={() => onSelectCategory("All")}
           className="rounded-full"
         >
-          All
+          Todos
         </Button>
 
         {CATEGORIES.map((category) => (

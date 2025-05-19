@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useListings } from "@/contexts/ListingsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
@@ -32,6 +32,8 @@ interface Profile {
   id: string;
   full_name: string;
   phone_number: string;
+  street: string;
+  house_number: string;
 }
 
 const ListingDetail = () => {
@@ -62,7 +64,7 @@ const ListingDetail = () => {
           // Fetch seller profile
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
-            .select("id, full_name, phone_number")
+            .select("id, full_name, phone_number, street, house_number")
             .eq("id", post.user_id)
             .single();
 
@@ -102,13 +104,11 @@ const ListingDetail = () => {
         <Header />
         <main className="flex-grow flex flex-col justify-center items-center px-4">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">
-            Listing Not Found
+            Anuncio no encontrado
           </h1>
-          <p className="text-gray-600 mb-6">
-            The listing you're looking for doesn't exist.
-          </p>
+          <p className="text-gray-600 mb-6">El anuncio que buscas no existe.</p>
           <Button onClick={() => navigate("/")} className="flex items-center">
-            <ArrowLeft size={18} className="mr-2" /> Go Back Home
+            <ArrowLeft size={18} className="mr-2" /> Volver al inicio
           </Button>
         </main>
         <BottomNavigation />
@@ -175,7 +175,7 @@ const ListingDetail = () => {
               className="flex items-center"
               onClick={() => navigate(-1)}
             >
-              <ArrowLeft size={18} className="mr-1" /> Back
+              <ArrowLeft size={18} className="mr-1" /> Volver
             </Button>
             {isOwner && (
               <div className="flex gap-2">
@@ -184,14 +184,14 @@ const ListingDetail = () => {
                   onClick={() => navigate(`/listings/${id}/edit`)}
                   className="flex items-center"
                 >
-                  <Edit size={18} className="mr-2" /> Edit
+                  <Edit size={18} className="mr-2" /> Editar
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteDialog(true)}
                   className="flex items-center"
                 >
-                  <Trash2 size={18} className="mr-2" /> Delete
+                  <Trash2 size={18} className="mr-2" /> Eliminar
                 </Button>
               </div>
             )}
@@ -216,7 +216,7 @@ const ListingDetail = () => {
                         prevImage();
                       }}
                       className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 hover:bg-opacity-100 transition-all"
-                      aria-label="Previous image"
+                      aria-label="Imagen anterior"
                     >
                       <ChevronLeft size={20} />
                     </button>
@@ -226,7 +226,7 @@ const ListingDetail = () => {
                         nextImage();
                       }}
                       className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 hover:bg-opacity-100 transition-all"
-                      aria-label="Next image"
+                      aria-label="Siguiente imagen"
                     >
                       <ChevronRight size={20} />
                     </button>
@@ -264,18 +264,26 @@ const ListingDetail = () => {
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
                     {title}
                   </h1>
-                  <span className="bg-marketplace-peach text-marketplace-secondary px-3 py-1 rounded-full text-sm">
-                    {category}
-                  </span>
+                  <div className="flex flex-wrap gap-1">
+                    {Array.isArray(category) &&
+                      category.map((cat) => (
+                        <span
+                          key={cat}
+                          className="bg-marketplace-peach text-marketplace-secondary px-3 py-1 rounded-full text-sm"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                  </div>
                 </div>
                 <p className="text-2xl font-semibold text-marketplace-primary mt-2">
                   {formatPrice(price)}
                 </p>
                 <div className="text-sm text-gray-500 mt-1">
-                  <p>Posted {timeAgo}</p>
+                  <p>Publicado {timeAgo}</p>
                   {wasUpdated && (
                     <p className="text-gray-400">
-                      Updated{" "}
+                      Actualizado{" "}
                       {formatDistanceToNow(new Date(updated_at), {
                         addSuffix: true,
                       })}
@@ -285,7 +293,7 @@ const ListingDetail = () => {
               </div>
 
               <div className="border-t border-gray-200 pt-6">
-                <h2 className="text-xl font-semibold mb-3">Description</h2>
+                <h2 className="text-xl font-semibold mb-3">Descripción</h2>
                 <p className="text-gray-700 whitespace-pre-line">
                   {description}
                 </p>
@@ -296,17 +304,31 @@ const ListingDetail = () => {
                   <h2 className="text-lg font-semibold mb-2">Vendedor</h2>
                   {sellerProfile && (
                     <>
-                      <p className="text-gray-700 mb-4">
-                        {sellerProfile.full_name}
-                      </p>
-                      <div className="space-y-3">
-                        {sellerProfile.phone_number && (
-                          <WhatsAppButton
-                            phoneNumber={sellerProfile.phone_number}
-                            message={`Hola, me interesa tu publicación "${title}" en Prados Marketplace`}
-                          />
-                        )}
-                      </div>
+                      <p className="text-gray-700">{sellerProfile.full_name}</p>
+                      {user ? (
+                        <div className="space-y-3 mt-4">
+                          <p className="text-sm text-gray-600">
+                            {sellerProfile.street} #{sellerProfile.house_number}
+                          </p>
+                          {sellerProfile.phone_number && (
+                            <WhatsAppButton
+                              phoneNumber={sellerProfile.phone_number}
+                              message={`Hola, me interesa tu publicación "${title}" en Prados Marketplace`}
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="mt-4">
+                          <Button asChild className="w-full">
+                            <Link
+                              to="/login"
+                              className="flex items-center justify-center"
+                            >
+                              Inicia sesión para ver detalles de contacto
+                            </Link>
+                          </Button>
+                        </div>
+                      )}
                     </>
                   )}
                 </Card>
@@ -329,10 +351,10 @@ const ListingDetail = () => {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Listing</DialogTitle>
+            <DialogTitle>Eliminar Anuncio</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this listing? This action cannot
-              be undone.
+              ¿Estás seguro de que quieres eliminar este anuncio? Esta acción no
+              se puede deshacer.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -341,14 +363,14 @@ const ListingDetail = () => {
               onClick={() => setShowDeleteDialog(false)}
               disabled={isDeleting}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteListing}
               disabled={isDeleting}
             >
-              {isDeleting ? <Spinner /> : "Delete"}
+              {isDeleting ? <Spinner /> : "Eliminar"}
             </Button>
           </DialogFooter>
         </DialogContent>

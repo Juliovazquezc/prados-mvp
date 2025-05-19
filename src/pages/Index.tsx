@@ -20,7 +20,10 @@ const Index = () => {
   // Filter posts by category and search query
   const filteredPosts = listings
     .filter(
-      (post) => selectedCategory === "All" || post.category === selectedCategory
+      (post) =>
+        selectedCategory === "All" ||
+        (Array.isArray(post.category) &&
+          post.category.includes(selectedCategory))
     )
     .filter(
       (post) =>
@@ -47,8 +50,8 @@ const Index = () => {
                 <Button size="sm" className="sm:h-10" asChild>
                   <Link to="/create" className="flex items-center">
                     <Plus size={16} className="mr-1 sm:mr-2" />
-                    <span className="hidden sm:inline">Create Listing</span>
-                    <span className="sm:hidden">Sell</span>
+                    <span className="hidden sm:inline">Crear Anuncio</span>
+                    <span className="sm:hidden">Vender</span>
                   </Link>
                 </Button>
               )}
@@ -62,7 +65,7 @@ const Index = () => {
                 />
                 <Input
                   type="text"
-                  placeholder="Search listings..."
+                  placeholder="Buscar anuncios..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-8 sm:pl-10 h-9 sm:h-10 text-sm"
@@ -77,7 +80,7 @@ const Index = () => {
                 className="whitespace-nowrap text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
                 size="sm"
               >
-                All
+                Todos
               </Button>
               {categories.map((category) => (
                 <Button
@@ -111,7 +114,8 @@ const Index = () => {
                         <img
                           src={post.images[0]}
                           alt={post.title}
-                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                          className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+                          loading="lazy"
                         />
                       )}
                     </div>
@@ -131,10 +135,10 @@ const Index = () => {
               </div>
             ) : (
               <div className="text-center my-12">
-                <p className="text-gray-500 mb-4">No listings found</p>
+                <p className="text-gray-500 mb-4">No se encontraron anuncios</p>
                 {isAuthenticated && (
                   <Button asChild>
-                    <Link to="/create">Create a listing</Link>
+                    <Link to="/create">Crear un anuncio</Link>
                   </Button>
                 )}
               </div>
