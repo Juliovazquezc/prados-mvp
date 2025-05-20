@@ -8,9 +8,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
 import { supabase } from "@/lib/supabase";
-import { Post, Database } from "@/types/database.types";
-
-type Category = Database["public"]["Tables"]["categories"]["Row"];
+import { Post } from "@/types/database.types";
 
 type ListingsContextType = {
   listings: Post[];
