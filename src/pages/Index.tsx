@@ -19,6 +19,7 @@ const Index = () => {
 
   // Filter posts by category and search query
   const filteredPosts = listings
+    .filter((post) => post.show_in_homepage)
     .filter(
       (post) =>
         selectedCategory === "Todos" ||
@@ -107,7 +108,7 @@ const Index = () => {
                   <Link
                     key={post.id}
                     to={`/listings/${post.id}`}
-                    className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200"
+                    className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200 flex flex-col"
                   >
                     <div className="aspect-square relative overflow-hidden bg-gray-100">
                       {post.images[0] && (
@@ -115,20 +116,21 @@ const Index = () => {
                           src={post.images[0]}
                           alt={post.title}
                           className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                          loading="lazy"
                         />
                       )}
                     </div>
-                    <div className="p-2 sm:p-3">
-                      <h3 className="font-medium text-gray-800 mb-0.5 line-clamp-1 text-xs sm:text-sm">
-                        {post.title}
-                      </h3>
-                      <p className="text-green-600 font-semibold text-xs sm:text-sm">
-                        {formatPrice(post.price)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-1 hidden sm:block">
-                        {post.description}
-                      </p>
+                    <div className="p-2 sm:p-3 flex flex-col flex-grow">
+                      <div className="flex-grow">
+                        <h3 className="font-medium text-gray-800 mb-0.5 line-clamp-1 text-xs sm:text-sm">
+                          {post.title}
+                        </h3>
+                        <p className="text-green-600 font-semibold text-xs sm:text-sm">
+                          {formatPrice(post.price)}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 sm:line-clamp-1">
+                          {post.description}
+                        </p>
+                      </div>
                     </div>
                   </Link>
                 ))}

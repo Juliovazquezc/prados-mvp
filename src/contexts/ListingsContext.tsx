@@ -148,6 +148,29 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteListing = async (id: string) => {
     try {
+      // First get the post to get the image URLs
+      const post = await getListingById(id);
+      if (!post) throw new Error("Post not found");
+
+      // Extract filenames from URLs
+      const imageFilenames = post.images.map((url) => {
+        const parts = url.split("/");
+        return parts[parts.length - 1];
+      });
+
+      // Delete all images from storage
+      for (const filename of imageFilenames) {
+        const { error: storageError } = await supabase.storage
+          .from("post-images")
+          .remove([filename]);
+
+        if (storageError) {
+          console.error("Error deleting image from storage:", storageError);
+          // Continue with other deletions even if one fails
+        }
+      }
+
+      // Then delete the post from the database
       const { error } = await supabase.from("posts").delete().eq("id", id);
 
       if (error) throw error;
@@ -161,10 +184,10 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       );
       postCache.delete(id);
 
-      toast.success("Listing deleted successfully");
+      toast.success("Anuncio eliminado exitosamente");
     } catch (error) {
       console.error("Error deleting listing:", error);
-      toast.error("Error deleting listing. Please try again.");
+      toast.error("Error al eliminar el anuncio");
     }
   };
 

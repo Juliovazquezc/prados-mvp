@@ -7,13 +7,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowLeft,
-  Trash2,
-  Edit,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft, Trash2 } from "lucide-react";
 import { Spinner } from "@/components/Spinner";
 import {
   Dialog,
@@ -179,13 +173,6 @@ const ListingDetail = () => {
             </Button>
             {isOwner && (
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(`/listings/${id}/edit`)}
-                  className="flex items-center"
-                >
-                  <Edit size={18} className="mr-2" /> Editar
-                </Button>
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteDialog(true)}

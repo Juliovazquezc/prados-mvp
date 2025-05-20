@@ -38,6 +38,7 @@ export type Database = {
           category: string[];
           images: string[];
           user_id: string;
+          show_in_homepage: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -49,6 +50,7 @@ export type Database = {
           category: string[];
           images: string[];
           user_id: string;
+          show_in_homepage?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -60,6 +62,7 @@ export type Database = {
           category?: string[];
           images?: string[];
           user_id?: string;
+          show_in_homepage?: boolean;
           created_at?: string;
           updated_at?: string;
         };

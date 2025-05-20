@@ -39,6 +39,12 @@ const Header = () => {
               >
                 {intl.formatMessage({ id: "app.createListing.short" })}
               </Link>
+              <Link
+                to="/my-listings"
+                className="text-marketplace-neutral hover:text-marketplace-primary transition-colors"
+              >
+                Mis Publicaciones
+              </Link>
               <div className="flex items-center">
                 <Button
                   onClick={signOut}
@@ -112,6 +118,13 @@ const Header = () => {
                 onClick={toggleMenu}
               >
                 {intl.formatMessage({ id: "app.createListing" })}
+              </Link>
+              <Link
+                to="/my-listings"
+                className="p-2 hover:bg-marketplace-accent-light rounded-md transition-colors duration-200 text-marketplace-neutral hover:text-marketplace-primary"
+                onClick={toggleMenu}
+              >
+                Mis Publicaciones
               </Link>
               <Button
                 variant="ghost"

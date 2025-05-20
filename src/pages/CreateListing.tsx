@@ -13,6 +13,7 @@ import { Spinner } from "@/components/Spinner";
 import { supabase } from "@/lib/supabase";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 const CreateListing = () => {
   const { refreshListings, categories } = useListings();
@@ -27,6 +28,7 @@ const CreateListing = () => {
   const [images, setImages] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showInHomepage, setShowInHomepage] = useState(true);
   const categorySelectRef = useRef<HTMLDivElement>(null);
 
   // Cerrar dropdown al hacer click fuera
@@ -114,6 +116,7 @@ const CreateListing = () => {
           category: selectedCategories,
           images: imageUrls,
           user_id: user.id,
+          show_in_homepage: showInHomepage,
         })
         .select()
         .single();
@@ -303,6 +306,17 @@ const CreateListing = () => {
                 maxImages={5}
                 error={errors.images}
               />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="show-in-homepage"
+                checked={showInHomepage}
+                onCheckedChange={setShowInHomepage}
+              />
+              <Label htmlFor="show-in-homepage">
+                Mostrar en la página principal
+              </Label>
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
