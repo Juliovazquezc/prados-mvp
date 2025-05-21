@@ -23,6 +23,7 @@ import ListingDetail from "./pages/ListingDetail";
 import NotFound from "./pages/NotFound";
 import Disclaimer from "./pages/Disclaimer";
 import MyListings from "./pages/MyListings";
+import ProfileEdit from "./pages/ProfileEdit";
 
 // Components
 import { LoadingSpinner } from "./components/ui/loading-spinner";
@@ -52,6 +53,7 @@ const routes: RouteConfig[] = [
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
   { path: "/my-listings", element: <MyListings />, requiresAuth: true },
+  { path: "/profile/edit", element: <ProfileEdit />, requiresAuth: true },
   { path: "/disclaimer", element: <Disclaimer /> },
   { path: "*", element: <NotFound /> },
 ];

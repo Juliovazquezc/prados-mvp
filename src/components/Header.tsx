@@ -45,6 +45,12 @@ const Header = () => {
               >
                 Mis Publicaciones
               </Link>
+              <Link
+                to="/profile/edit"
+                className="text-marketplace-neutral hover:text-marketplace-primary transition-colors"
+              >
+                Perfil
+              </Link>
               <div className="flex items-center">
                 <Button
                   onClick={signOut}
@@ -125,6 +131,13 @@ const Header = () => {
                 onClick={toggleMenu}
               >
                 Mis Publicaciones
+              </Link>
+              <Link
+                to="/profile/edit"
+                className="p-2 hover:bg-marketplace-accent-light rounded-md transition-colors duration-200 text-marketplace-neutral hover:text-marketplace-primary"
+                onClick={toggleMenu}
+              >
+                Perfil
               </Link>
               <Button
                 variant="ghost"

@@ -30,6 +30,13 @@ const BottomNavigation = () => {
         <span>Mis Anuncios</span>
       </Link>
       <Link
+        to="/profile/edit"
+        className={`nav-item ${path === "/profile/edit" ? "active" : ""}`}
+      >
+        <User size={20} />
+        <span>Perfil</span>
+      </Link>
+      <Link
         to="/disclaimer"
         className={`nav-item ${path === "/disclaimer" ? "active" : ""}`}
       >

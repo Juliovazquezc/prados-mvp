@@ -37,6 +37,8 @@ import ListingEditForm, {
   ListingEditFormState,
 } from "@/components/ListingEditForm";
 
+import { es } from "date-fns/locale";
+
 interface Profile {
   id: string;
   full_name: string;
@@ -267,6 +269,7 @@ const ListingDetail = () => {
 
   const timeAgo = formatDistanceToNow(new Date(created_at), {
     addSuffix: true,
+    locale: es,
   });
 
   const wasUpdated = created_at !== updated_at;

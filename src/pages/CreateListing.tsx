@@ -15,6 +15,9 @@ import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 
+const MAX_LISTINGS_PER_USER =
+  Number(import.meta.env.VITE_MAX_LISTINGS_PER_USER) || 5;
+
 const CreateListing = () => {
   const { refreshListings, categories } = useListings();
   const { user } = useAuth();
@@ -98,6 +101,22 @@ const CreateListing = () => {
     e.preventDefault();
 
     if (!validateForm() || !user) return;
+
+    // Verificar el número de publicaciones del usuario antes de crear una nueva
+    const { count, error: countError } = await supabase
+      .from("posts")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+    if (countError) {
+      toast.error("No se pudo verificar el límite de publicaciones");
+      return;
+    }
+    if ((count ?? 0) >= MAX_LISTINGS_PER_USER) {
+      toast.error(
+        `Has alcanzado el máximo de ${MAX_LISTINGS_PER_USER} publicaciones permitidas.`
+      );
+      return;
+    }
 
     setIsLoading(true);
 
