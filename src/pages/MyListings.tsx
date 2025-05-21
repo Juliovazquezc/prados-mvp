@@ -77,12 +77,16 @@ const MyListings = () => {
                   >
                     <div className="aspect-square relative overflow-hidden bg-gray-100">
                       {post.images[0] && (
-                        <img
-                          src={post.images[0]}
-                          alt={post.title}
-                          loading="lazy"
-                          className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                        />
+                        <>
+                          <img
+                            src={post.images[0]}
+                            alt={post.title}
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+                            style={{ filter: 'blur(12px)', transition: 'filter 0.3s' }}
+                            onLoad={e => e.currentTarget.style.filter = 'none'}
+                          />
+                        </>
                       )}
                     </div>
                     <div className="p-2 sm:p-3 flex flex-col flex-grow">
