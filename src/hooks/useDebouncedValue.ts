@@ -1,0 +1,34 @@
+import { useRef, useCallback, useState, useEffect } from "react";
+
+/**
+ * useDebouncedValue
+ * @param value The value to debounce
+ * @param delay Debounce delay in ms
+ * @returns [debouncedValue, setValue]
+ */
+export function useDebouncedValue<T>(
+  value: T,
+  delay: number
+): [T, (v: T) => void] {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  const timeout = useRef<NodeJS.Timeout | null>(null);
+
+  const setValue = useCallback(
+    (v: T) => {
+      if (timeout.current) clearTimeout(timeout.current);
+      timeout.current = setTimeout(() => {
+        setDebouncedValue(v);
+      }, delay);
+    },
+    [delay]
+  );
+
+  useEffect(() => {
+    setDebouncedValue(value);
+    // Si el valor cambia desde fuera, también actualiza el debounce
+    // y limpia el timeout pendiente
+    if (timeout.current) clearTimeout(timeout.current);
+  }, [value]);
+
+  return [debouncedValue, setValue];
+}

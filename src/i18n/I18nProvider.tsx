@@ -41,7 +41,7 @@ export const I18nProvider = ({ children }: I18nProviderProps) => {
       return savedLocale;
     }
     const browserLocale = navigator.language.split("-")[0] as Locale;
-    return ["en", "es"].includes(browserLocale) ? browserLocale : "en";
+    return ["en", "es"].includes(browserLocale) ? browserLocale : "es";
   };
 
   const [locale, setLocale] = useState<Locale>(getInitialLocale());
@@ -62,7 +62,7 @@ export const I18nProvider = ({ children }: I18nProviderProps) => {
       <SafeIntlProvider
         messages={MESSAGES[locale]}
         locale={locale}
-        defaultLocale="en"
+        defaultLocale="es"
       >
         {children}
       </SafeIntlProvider>

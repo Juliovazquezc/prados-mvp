@@ -4,6 +4,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useRef,
 } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
@@ -50,8 +51,11 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
   const [userListings, setUserListings] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categories, setCategories] = useState<string[]>([]);
+  const isAlreadyFetchingCategories = useRef(false);
+  const isAlreadyFetchingListings = useRef(false);
 
   const fetchCategories = async () => {
+    isAlreadyFetchingCategories.current = true;
     try {
       const { data, error } = await supabase
         .from("categories")
@@ -66,10 +70,13 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       setCategories(data.map((cat) => cat.name));
     } catch (error) {
       console.error("Error fetching categories:", error);
+    } finally {
+      isAlreadyFetchingCategories.current = false;
     }
   };
 
   const fetchListings = async () => {
+    isAlreadyFetchingListings.current = true;
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -107,6 +114,7 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       toast.error("Error fetching listings. Please try again.");
     } finally {
       setIsLoading(false);
+      isAlreadyFetchingListings.current = false;
     }
   };
 
@@ -207,8 +215,13 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    fetchCategories();
-    fetchListings();
+    if (!user) return;
+    if (!isAlreadyFetchingCategories.current) {
+      fetchCategories();
+    }
+    if (!isAlreadyFetchingListings.current) {
+      fetchListings();
+    }
   }, [user]);
 
   return (
@@ -229,3 +242,6 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
     </ListingsContext.Provider>
   );
 };
+
+// NUEVO: Hook para paginación
+// Ahora importado desde hooks/usePaginatedListings

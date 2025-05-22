@@ -10,7 +10,7 @@ const BottomNavigation = () => {
   if (!isAuthenticated) return null;
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav text-center">
       <Link to="/" className={`nav-item ${path === "/" ? "active" : ""}`}>
         <Home size={20} />
         <span>Inicio</span>

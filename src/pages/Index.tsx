@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useListings } from "@/contexts/ListingsContext";
@@ -8,29 +8,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
 import { Spinner } from "@/components/Spinner";
+import { useInView } from "react-intersection-observer";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { usePaginatedListings } from "@/hooks/usePaginatedListings";
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
-  const { listings, isLoading, categories } = useListings();
-  const [selectedCategory, setSelectedCategory] = useState<
-    (typeof categories)[number] | "Todos"
-  >("Todos");
+  const { categories } = useListings();
+  const [selectedCategory, setSelectedCategory] = useState<string | "Todos">(
+    "Todos"
+  );
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch] = useDebouncedValue(searchQuery, 400);
+  const PAGE_SIZE = 12;
+  const {
+    posts: visiblePosts,
+    hasMore,
+    loadingInitial,
+    loadingMore,
+    loadMore,
+  } = usePaginatedListings(PAGE_SIZE, selectedCategory, debouncedSearch);
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0,
+    rootMargin: "200px",
+  });
 
-  // Filter posts by category and search query
-  const filteredPosts = listings
-    .filter((post) => post.show_in_homepage)
-    .filter(
-      (post) =>
-        selectedCategory === "Todos" ||
-        (Array.isArray(post.category) &&
-          post.category.includes(selectedCategory))
-    )
-    .filter(
-      (post) =>
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  useEffect(() => {
+    if (inView && hasMore && !loadingMore) {
+      loadMore();
+    }
+  }, [inView, hasMore, loadingMore, loadMore]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -98,43 +105,58 @@ const Index = () => {
               ))}
             </div>
 
-            {isLoading ? (
+            {loadingInitial && visiblePosts.length === 0 ? (
               <div className="flex justify-center my-12">
                 <Spinner />
               </div>
-            ) : filteredPosts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-                {filteredPosts.map((post) => (
-                  <Link
-                    key={post.id}
-                    to={`/listings/${post.id}`}
-                    className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200 flex flex-col"
-                  >
-                    <div className="aspect-square relative overflow-hidden bg-gray-100">
-                      {post.images[0] && (
-                        <img
-                          src={post.images[0]}
-                          alt={post.title}
-                          className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
-                        />
-                      )}
-                    </div>
-                    <div className="p-2 sm:p-3 flex flex-col flex-grow">
-                      <div className="flex-grow">
-                        <h3 className="font-medium text-gray-800 mb-0.5 line-clamp-1 text-xs sm:text-sm">
-                          {post.title}
-                        </h3>
-                        <p className="text-green-600 font-semibold text-xs sm:text-sm">
-                          {formatPrice(post.price)}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 sm:line-clamp-1">
-                          {post.description}
-                        </p>
+            ) : visiblePosts.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                  {visiblePosts.map((post) => (
+                    <Link
+                      key={post.id}
+                      to={`/listings/${post.id}`}
+                      className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-gray-300 transition-all duration-200 flex flex-col"
+                    >
+                      <div className="aspect-square relative overflow-hidden bg-gray-100">
+                        {post.images[0] && (
+                          <img
+                            src={post.images[0]}
+                            alt={post.title}
+                            loading="lazy"
+                            className="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-200"
+                            style={{
+                              filter: "blur(12px)",
+                              transition: "filter 0.3s",
+                            }}
+                            onLoad={(e) =>
+                              (e.currentTarget.style.filter = "none")
+                            }
+                          />
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                      <div className="p-2 sm:p-3 flex flex-col flex-grow">
+                        <div className="flex-grow">
+                          <h3 className="font-medium text-gray-800 mb-0.5 line-clamp-1 text-xs sm:text-sm">
+                            {post.title}
+                          </h3>
+                          <p className="text-green-600 font-semibold text-xs sm:text-sm">
+                            {formatPrice(post.price)}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 sm:line-clamp-1">
+                            {post.description}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+                {hasMore && (
+                  <div ref={loadMoreRef} className="flex justify-center my-8">
+                    {loadingMore ? <Spinner /> : null}
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center my-12">
                 <p className="text-gray-500 mb-4">No se encontraron anuncios</p>
