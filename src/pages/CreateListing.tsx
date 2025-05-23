@@ -34,7 +34,6 @@ const CreateListing = () => {
   const [showInHomepage, setShowInHomepage] = useState(true);
   const categorySelectRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     if (!showCategoryDropdown) return;
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,7 +69,6 @@ const CreateListing = () => {
 
   const uploadImage = async (imageFile: string): Promise<string> => {
     try {
-      // Convert base64 to blob
       const blob = await fetch(imageFile).then((res) => res.blob());
 
       const fileName = `${uuidv4()}-${Date.now()}`;
@@ -102,7 +100,6 @@ const CreateListing = () => {
 
     if (!validateForm() || !user) return;
 
-    // Verificar el número de publicaciones del usuario antes de crear una nueva
     const { count, error: countError } = await supabase
       .from("posts")
       .select("id", { count: "exact", head: true })
@@ -121,11 +118,9 @@ const CreateListing = () => {
     setIsLoading(true);
 
     try {
-      // Upload all images to Supabase Storage
       const uploadPromises = images.map((image) => uploadImage(image));
       const imageUrls = await Promise.all(uploadPromises);
 
-      // Create the post in the database
       const { data: post, error } = await supabase
         .from("posts")
         .insert({
@@ -322,7 +317,7 @@ const CreateListing = () => {
               <ImageUpload
                 images={images}
                 setImages={setImages}
-                maxImages={5}
+                maxImages={4}
                 error={errors.images}
               />
             </div>

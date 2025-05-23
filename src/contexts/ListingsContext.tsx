@@ -242,6 +242,3 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
     </ListingsContext.Provider>
   );
 };
-
-// NUEVO: Hook para paginación
-// Ahora importado desde hooks/usePaginatedListings

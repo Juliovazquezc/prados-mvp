@@ -11,6 +11,7 @@ import { Spinner } from "@/components/Spinner";
 import { useInView } from "react-intersection-observer";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { usePaginatedListings } from "@/hooks/usePaginatedListings";
+import { PAGE_SIZE } from "@/lib/postsConstants";
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
@@ -20,7 +21,7 @@ const Index = () => {
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebouncedValue(searchQuery, 400);
-  const PAGE_SIZE = 12;
+
   const {
     posts: visiblePosts,
     hasMore,

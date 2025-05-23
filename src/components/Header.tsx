@@ -3,13 +3,11 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { useIntl } from "react-intl";
 // import LanguageSwitcher from "./LanguageSwitcher";
 
 const Header = () => {
   const { isAuthenticated, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const intl = useIntl();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -28,7 +26,7 @@ const Header = () => {
             to="/"
             className="text-marketplace-neutral hover:text-marketplace-primary transition-colors"
           >
-            {intl.formatMessage({ id: "nav.home" })}
+            Inicio
           </Link>
 
           {isAuthenticated ? (
@@ -37,7 +35,7 @@ const Header = () => {
                 to="/create"
                 className="text-marketplace-neutral hover:text-marketplace-primary transition-colors"
               >
-                {intl.formatMessage({ id: "app.createListing.short" })}
+                Vender
               </Link>
               <Link
                 to="/my-listings"
@@ -56,7 +54,7 @@ const Header = () => {
                   onClick={signOut}
                   className="text-sm bg-marketplace-primary hover:bg-marketplace-primary/90 text-white"
                 >
-                  {intl.formatMessage({ id: "nav.logout" })}
+                  Cerrar Sesión
                 </Button>
               </div>
             </>
@@ -68,18 +66,14 @@ const Header = () => {
                 className="border-marketplace-accent hover:bg-marketplace-accent-light text-marketplace-neutral"
                 asChild
               >
-                <Link to="/login">
-                  {intl.formatMessage({ id: "nav.login" })}
-                </Link>
+                <Link to="/login">Iniciar Sesión</Link>
               </Button>
               <Button
                 size="sm"
                 className="bg-marketplace-primary hover:bg-marketplace-primary/90 text-white"
                 asChild
               >
-                <Link to="/register">
-                  {intl.formatMessage({ id: "nav.register" })}
-                </Link>
+                <Link to="/register">Registrarse</Link>
               </Button>
             </div>
           )}
@@ -113,7 +107,7 @@ const Header = () => {
             className="p-2 hover:bg-marketplace-accent-light rounded-md transition-colors duration-200 text-marketplace-neutral hover:text-marketplace-primary"
             onClick={toggleMenu}
           >
-            {intl.formatMessage({ id: "nav.home" })}
+            Inicio
           </Link>
 
           {isAuthenticated ? (
@@ -123,7 +117,7 @@ const Header = () => {
                 className="p-2 hover:bg-marketplace-accent-light rounded-md transition-colors duration-200 text-marketplace-neutral hover:text-marketplace-primary"
                 onClick={toggleMenu}
               >
-                {intl.formatMessage({ id: "app.createListing" })}
+                Crear Anuncio
               </Link>
               <Link
                 to="/my-listings"
@@ -147,7 +141,7 @@ const Header = () => {
                 }}
                 className="justify-start text-marketplace-primary hover:bg-marketplace-primary-light transition-colors duration-200"
               >
-                {intl.formatMessage({ id: "nav.logout" })}
+                Cerrar Sesión
               </Button>
             </>
           ) : (
@@ -158,18 +152,14 @@ const Header = () => {
                 className="w-full border-marketplace-accent hover:bg-marketplace-accent-light text-marketplace-neutral transition-colors duration-200"
                 asChild
               >
-                <Link to="/login">
-                  {intl.formatMessage({ id: "nav.login" })}
-                </Link>
+                <Link to="/login">Iniciar Sesión</Link>
               </Button>
               <Button
                 onClick={toggleMenu}
                 className="w-full bg-marketplace-primary hover:bg-marketplace-primary/90 text-white transition-colors duration-200"
                 asChild
               >
-                <Link to="/register">
-                  {intl.formatMessage({ id: "nav.register" })}
-                </Link>
+                <Link to="/register">Registrarse</Link>
               </Button>
             </div>
           )}

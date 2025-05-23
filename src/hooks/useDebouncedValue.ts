@@ -25,8 +25,7 @@ export function useDebouncedValue<T>(
 
   useEffect(() => {
     setDebouncedValue(value);
-    // Si el valor cambia desde fuera, también actualiza el debounce
-    // y limpia el timeout pendiente
+
     if (timeout.current) clearTimeout(timeout.current);
   }, [value]);
 

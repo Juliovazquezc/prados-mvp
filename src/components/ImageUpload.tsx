@@ -21,27 +21,25 @@ const ImageUpload = ({
 
   const compressImage = async (file: File) => {
     const options = {
-      maxSizeMB: 0.5, // Reducido a 500KB máximo
-      maxWidthOrHeight: 1280, // Reducido a 1280px máximo
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1280,
       useWebWorker: true,
       fileType: file.type,
-      initialQuality: 0.7, // 70% de calidad inicial
-      alwaysKeepResolution: false, // Permite reducir la resolución si es necesario
-      preserveExif: false, // No preservar metadata EXIF para reducir tamaño
-      strict: true, // Fuerza el tamaño máximo
+      initialQuality: 0.7,
+      alwaysKeepResolution: false,
+      preserveExif: false,
+      strict: true,
     };
 
     try {
       let compressedFile = await imageCompression(file, options);
 
-      // Si el archivo sigue siendo muy grande, intentamos una segunda pasada con calidad más baja
       if (compressedFile.size > 500000) {
-        // Si es mayor a 500KB
         const secondPassOptions = {
           ...options,
-          maxSizeMB: 0.3, // 300KB
-          initialQuality: 0.5, // 50% de calidad
-          maxWidthOrHeight: 1024, // 1024px máximo
+          maxSizeMB: 0.3,
+          initialQuality: 0.5,
+          maxWidthOrHeight: 1024,
         };
         compressedFile = await imageCompression(
           compressedFile,
@@ -52,7 +50,7 @@ const ImageUpload = ({
       return URL.createObjectURL(compressedFile);
     } catch (error) {
       console.error("Error comprimiendo imagen:", error);
-      // Si hay un error en la compresión, devolvemos la imagen original
+
       return URL.createObjectURL(file);
     }
   };
@@ -70,7 +68,6 @@ const ImageUpload = ({
       setImages([...images, ...newImages]);
     }
 
-    // Reset input value to allow uploading the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -130,7 +127,7 @@ const ImageUpload = ({
                 error ? "text-red-500" : "text-gray-600"
               }`}
             >
-              {intl.formatMessage({ id: "imageUpload.addImage" })}
+              Agregar imagen
             </span>
           </button>
         )}
@@ -147,13 +144,7 @@ const ImageUpload = ({
       />
 
       <div className="text-sm text-gray-500">
-        {intl.formatMessage(
-          { id: "imageUpload.counter" },
-          {
-            current: images.length,
-            max: maxImages,
-          }
-        )}
+        {`${images.length} de ${maxImages} imágenes`}
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
     </div>

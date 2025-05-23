@@ -458,7 +458,7 @@ const ListingDetail = () => {
                         <div className="pt-4">
                           <WhatsAppButton
                             phoneNumber={sellerProfile.phone_number}
-                            message={`Hola, me interesa tu publicación "${title}" en Prados del Este`}
+                            message={`Hola, me interesa tu publicación "${title}" en Prados Residencial`}
                           />
                         </div>
                       </div>
