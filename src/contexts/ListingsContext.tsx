@@ -8,8 +8,14 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
-import { supabase } from "@/lib/supabase";
 import { Post } from "@/types/database.types";
+import {
+  getAllListings,
+  getListingById as getListingByIdApi,
+  deleteListing as deleteListingApi,
+  getAllCategories,
+} from "@/lib/supabaseApi";
+import { deleteMultipleImages } from "@/lib/supabaseImages";
 
 type ListingsContextType = {
   listings: Post[];
@@ -57,17 +63,8 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
   const fetchCategories = async () => {
     isAlreadyFetchingCategories.current = true;
     try {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("name")
-        .order("name");
-
-      if (error) {
-        console.error("Error fetching categories:", error);
-        return;
-      }
-
-      setCategories(data.map((cat) => cat.name));
+      const categoriesData = await getAllCategories();
+      setCategories(categoriesData);
     } catch (error) {
       console.error("Error fetching categories:", error);
     } finally {
@@ -79,17 +76,12 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
     isAlreadyFetchingListings.current = true;
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
+      const data = await getAllListings();
 
       // Update cache with new data
       const now = Date.now();
       const newCache: Record<string, CachedPost> = {};
-      data?.forEach((post) => {
+      data.forEach((post) => {
         newCache[post.id] = {
           data: post,
           timestamp: now,
@@ -99,12 +91,12 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       for (const [id, cachedPost] of Object.entries(newCache)) {
         postCache.set(id, cachedPost);
       }
-      setListings(data || []);
+
+      setListings(data);
 
       // Update user listings
       if (user) {
-        const userPosts =
-          data?.filter((post) => post.user_id === user.id) || [];
+        const userPosts = data.filter((post) => post.user_id === user.id) || [];
         setUserListings(userPosts);
       } else {
         setUserListings([]);
@@ -129,13 +121,7 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // If not in cache or expired, fetch from API
-      const { data, error } = await supabase
-        .from("posts")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
+      const data = await getListingByIdApi(id);
 
       // Update cache with new data
       if (data) {
@@ -158,28 +144,18 @@ export const ListingsProvider = ({ children }: { children: ReactNode }) => {
       const post = await getListingById(id);
       if (!post) throw new Error("Post not found");
 
-      // Extract filenames from URLs
-      const imageFilenames = post.images.map((url) => {
-        const parts = url.split("/");
-        return parts[parts.length - 1];
-      });
-
-      // Delete all images from storage
-      for (const filename of imageFilenames) {
-        const { error: storageError } = await supabase.storage
-          .from("post-images")
-          .remove([filename]);
-
-        if (storageError) {
-          console.error("Error deleting image from storage:", storageError);
-          // Continue with other deletions even if one fails
-        }
+      // Delete all images from storage if user is the owner
+      if (
+        user &&
+        post.user_id === user.id &&
+        post.images &&
+        post.images.length > 0
+      ) {
+        await deleteMultipleImages(post.images, user.id);
       }
 
       // Then delete the post from the database
-      const { error } = await supabase.from("posts").delete().eq("id", id);
-
-      if (error) throw error;
+      await deleteListingApi(id);
 
       // Update local state
       setListings((prevListings) =>

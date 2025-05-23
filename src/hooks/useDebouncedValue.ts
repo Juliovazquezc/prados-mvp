@@ -24,10 +24,16 @@ export function useDebouncedValue<T>(
   );
 
   useEffect(() => {
-    setDebouncedValue(value);
-
     if (timeout.current) clearTimeout(timeout.current);
-  }, [value]);
+
+    timeout.current = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      if (timeout.current) clearTimeout(timeout.current);
+    };
+  }, [value, delay]);
 
   return [debouncedValue, setValue];
 }

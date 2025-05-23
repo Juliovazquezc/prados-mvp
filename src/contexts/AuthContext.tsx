@@ -1,6 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
+// Importación relativa para mayor claridad
+import {
+  signInWithEmailPassword,
+  signUpWithEmailPassword,
+  signOut as authSignOut,
+} from "../lib/authApi";
 
 type UserMetadata = {
   full_name: string;
@@ -46,11 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    await signInWithEmailPassword(email, password);
   };
 
   const signUp = async (
@@ -58,47 +60,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     metadata: UserMetadata
   ) => {
-    try {
-      // Sign up the user
-      const { data: authData, error: signUpError } = await supabase.auth.signUp(
-        {
-          email,
-          password,
-        }
-      );
-
-      if (signUpError) throw signUpError;
-      if (!authData.user) throw new Error("No user data returned from signup");
-
-      // Create the user profile
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: authData.user.id,
-        full_name: metadata.full_name,
-        street: metadata.street,
-        house_number: metadata.house_number,
-        phone_number: metadata.phone_number,
-      });
-
-      if (profileError) {
-        // If profile creation fails, we should delete the auth user
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw profileError;
-      }
-
-      // Automatically sign in after signup
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw signInError;
-    } catch (error) {
-      throw error;
-    }
+    await signUpWithEmailPassword(email, password, metadata);
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    await authSignOut();
   };
 
   return (
@@ -109,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signIn,
         signUp,
         signOut,
-        isAuthenticated: Boolean(user),
+        isAuthenticated: !!user,
       }}
     >
       {children}
