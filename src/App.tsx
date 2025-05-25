@@ -15,8 +15,8 @@ import { Suspense, type FC } from "react";
 import { I18nProvider } from "@/i18n/I18nProvider";
 
 // Pages
-import { LoginForm } from "@/pages/Login";
-import { SignUpForm } from "@/pages/Register";
+import LoginForm from "@/pages/Login";
+import RegisterForm from "./pages/Register";
 import Index from "./pages/Index";
 import CreateListing from "./pages/CreateListing";
 import ListingDetail from "./pages/ListingDetail";
@@ -51,7 +51,7 @@ type RouteConfig = {
 const routes: RouteConfig[] = [
   { path: "/", element: <Index />, requiresAuth: true },
   { path: "/login", element: <LoginForm />, redirectIfAuth: true },
-  { path: "/register", element: <SignUpForm />, redirectIfAuth: true },
+  { path: "/register", element: <RegisterForm />, redirectIfAuth: true },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
   { path: "/my-listings", element: <MyListings />, requiresAuth: true },

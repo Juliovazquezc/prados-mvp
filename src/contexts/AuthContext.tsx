@@ -1,11 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
+import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 // Importación relativa para mayor claridad
 import {
   signInWithEmailPassword,
   signUpWithEmailPassword,
   signOut as authSignOut,
+  signInWithPhone,
+  verifyOtp,
+  signInWithPhonePassword,
+  setPasswordAfterPhoneVerification,
 } from "../lib/authApi";
 
 type UserMetadata = {
@@ -24,6 +28,16 @@ type AuthContextType = {
     password: string,
     metadata: UserMetadata
   ) => Promise<void>;
+  signInWithPhone: (phone_number: string) => Promise<void>;
+  verifyPhoneOtp: (
+    phone: string,
+    otp: string
+  ) => Promise<
+    | { user: User | null; session: Session | null }
+    | { user: null; session: null }
+  >;
+  signInWithPhonePassword: (phone: string, password: string) => Promise<void>;
+  setPassword: (password: string) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -63,6 +77,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signUpWithEmailPassword(email, password, metadata);
   };
 
+  const signInPhone = async (phone_number: string) => {
+    await signInWithPhone(phone_number);
+  };
+
+  const verifyPhoneOtp = async (phone: string, otp: string) => {
+    return await verifyOtp(phone, otp);
+  };
+
+  const signInWithPhoneAndPassword = async (
+    phone: string,
+    password: string
+  ) => {
+    await signInWithPhonePassword(phone, password);
+  };
+
+  const setPassword = async (password: string) => {
+    await setPasswordAfterPhoneVerification(password);
+  };
+
   const signOut = async () => {
     await authSignOut();
   };
@@ -74,6 +107,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loading,
         signIn,
         signUp,
+        signInWithPhone: signInPhone,
+        verifyPhoneOtp,
+        signInWithPhonePassword: signInWithPhoneAndPassword,
+        setPassword,
         signOut,
         isAuthenticated: !!user,
       }}

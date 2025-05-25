@@ -69,6 +69,87 @@ export const signUpWithEmailPassword = async (
 };
 
 /**
+ * Sign in with OTP via SMS
+ * @param phone_number Formato: +52xxxxxxxxxx (con código de país)
+ */
+export const signInWithPhone = async (phone_number: string) => {
+  const formattedPhone = formatPhoneWithCountryCode(phone_number);
+  const { data, error } = await supabase.auth.signInWithOtp({
+    phone: formattedPhone,
+  });
+
+  if (error) throw error;
+  return { success: true, data };
+};
+
+/**
+ * Verify the OTP sent to the phone number
+ */
+export const verifyOtp = async (phone_number: string, otp: string) => {
+  const formattedPhone = formatPhoneWithCountryCode(phone_number);
+  const { data, error } = await supabase.auth.verifyOtp({
+    phone: formattedPhone,
+    token: otp,
+    type: "sms",
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Sign in with phone number and password
+ */
+export const signInWithPhonePassword = async (
+  phone_number: string,
+  password: string
+) => {
+  // Validate password length
+  if (password.length < 6) {
+    throw new Error("La contraseña debe tener al menos 6 caracteres");
+  }
+
+  const formattedPhone = formatPhoneWithCountryCode(phone_number);
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    phone: formattedPhone,
+    password,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Set password after phone verification
+ * @param password La nueva contraseña para el usuario
+ */
+export const setPasswordAfterPhoneVerification = async (password: string) => {
+  const { data, error } = await supabase.auth.updateUser({
+    password: password,
+  });
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Format phone number with country code
+ */
+export const formatPhoneWithCountryCode = (phone: string) => {
+  // Remove any non-numeric characters
+  const numericOnly = phone.replace(/\D/g, "");
+
+  // Add Mexico country code (+52) if not present
+  if (numericOnly.length === 10) {
+    return `+52${numericOnly}`;
+  }
+
+  // If already has country code or other format, return as is with + prefix
+  return numericOnly.startsWith("52") ? `+${numericOnly}` : `+${numericOnly}`;
+};
+
+/**
  * Sign out the current user
  */
 export const signOut = async () => {

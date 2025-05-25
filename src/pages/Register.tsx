@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Select,
@@ -21,20 +22,26 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { PhoneNumberInput } from "@/components/PhoneNumberInput";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/lib/supabase";
 
-export const SignUpForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+const RegisterForm = () => {
   const [fullName, setFullName] = useState("");
   const [street, setStreet] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isPhoneValid, setIsPhoneValid] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<"form" | "otp">("form");
+  const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { signUp } = useAuth();
+  const {
+    signInWithPhone,
+    verifyPhoneOtp,
+    setPassword: updatePassword,
+  } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -43,85 +50,117 @@ export const SignUpForm = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!fullName) newErrors.fullName = "El nombre completo es requerido";
-    if (!email) newErrors.email = "El correo electrónico es requerido";
-    if (!password) newErrors.password = "La contraseña es requerida";
-    else if (password.length < 6)
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
-    if (!confirmPassword) newErrors.confirmPassword = "Confirma tu contraseña";
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Las contraseñas no coinciden";
-    }
     if (!street) newErrors.street = "Selecciona una calle";
     if (!houseNumber) newErrors.houseNumber = "Selecciona un número";
-    if (!phoneNumber || !isPhoneValid)
-      newErrors.phone = "Ingresa un número de teléfono válido";
+    if (!isPhoneValid) newErrors.phone = "Ingresa un número de teléfono válido";
+    if (password.length < 6)
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+    if (password !== confirmPassword)
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
     if (!acceptPrivacyPolicy)
       newErrors.privacyPolicy =
         "Debes aceptar el aviso de privacidad para continuar";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Por favor complete todos los campos correctamente",
+        description: "Por favor completa todos los campos correctamente",
       });
       return;
     }
-
     setIsLoading(true);
-
     try {
-      await signUp(email, password, {
-        full_name: fullName,
-        street: street,
-        house_number: houseNumber,
-        phone_number: phoneNumber,
-      });
+      // Validar que el teléfono no esté registrado
+      const { data: existing, error: phoneError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("phone_number", phoneNumber)
+        .maybeSingle();
+      if (phoneError) throw phoneError;
+      if (existing) {
+        toast({
+          variant: "destructive",
+          title: "Teléfono ya registrado",
+          description:
+            "Este número de teléfono ya está en uso. Usa otro o inicia sesión.",
+        });
+        setIsLoading(false);
+        return;
+      }
+      await signInWithPhone(phoneNumber);
+      setStep("otp");
       toast({
-        title: "Éxito",
-        description: "Tu cuenta ha sido creada y ahora estás conectado.",
+        title: "Código enviado",
+        description:
+          "Se ha enviado un código de verificación a tu número de teléfono",
       });
-      navigate("/"); // Redirect to homepage after successful signup
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description:
-          error instanceof Error ? error.message : "Error al registrarse",
+          error instanceof Error
+            ? error.message
+            : "Error al enviar el código de verificación",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePhoneChange = (value: string, isValid: boolean) => {
-    setPhoneNumber(value);
-    setIsPhoneValid(isValid);
-    if (errors.phone) {
-      setErrors((prev) => ({ ...prev, phone: "" }));
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "El código de verificación debe tener 6 dígitos",
+      });
+      return;
     }
-  };
-
-  const handleStreetChange = (value: string) => {
-    setStreet(value);
-    if (errors.street) {
-      setErrors((prev) => ({ ...prev, street: "" }));
-    }
-  };
-
-  const handleHouseNumberChange = (value: string) => {
-    setHouseNumber(value);
-    if (errors.houseNumber) {
-      setErrors((prev) => ({ ...prev, houseNumber: "" }));
+    setIsLoading(true);
+    try {
+      const response = await verifyPhoneOtp(phoneNumber, otp);
+      if (response && response.user) {
+        await updatePassword(password);
+        // Crear el perfil del usuario
+        const { error: profileError } = await supabase.from("profiles").upsert(
+          {
+            id: response.user.id,
+            full_name: fullName,
+            phone_number: phoneNumber,
+            street: street,
+            house_number: houseNumber,
+          },
+          { onConflict: "id" }
+        );
+        if (profileError) throw profileError;
+        toast({
+          title: "Éxito",
+          description: "Tu cuenta ha sido creada y ahora estás conectado.",
+        });
+        navigate("/");
+      } else {
+        throw new Error("No se pudo verificar el número de teléfono");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Error al verificar el código",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,21 +171,20 @@ export const SignUpForm = () => {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Registro</CardTitle>
-            <CardDescription>Crea una nueva cuenta</CardDescription>
+            <CardDescription>
+              {step === "form"
+                ? "Crea tu cuenta con tus datos y número de celular"
+                : "Ingresa el código que recibiste por SMS"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+            {step === "form" && (
+              <form onSubmit={handleSendOtp} className="space-y-4">
                 <Input
                   type="text"
                   placeholder="Nombre completo"
                   value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    if (errors.fullName) {
-                      setErrors((prev) => ({ ...prev, fullName: "" }));
-                    }
-                  }}
+                  onChange={(e) => setFullName(e.target.value)}
                   required
                   disabled={isLoading}
                   className={errors.fullName ? "border-red-500" : ""}
@@ -154,68 +192,7 @@ export const SignUpForm = () => {
                 {errors.fullName && (
                   <p className="text-sm text-red-500">{errors.fullName}</p>
                 )}
-              </div>
-              <div className="space-y-2">
-                <Input
-                  type="email"
-                  placeholder="Correo electrónico"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errors.email) {
-                      setErrors((prev) => ({ ...prev, email: "" }));
-                    }
-                  }}
-                  required
-                  disabled={isLoading}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="Contraseña"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errors.password) {
-                      setErrors((prev) => ({ ...prev, password: "" }));
-                    }
-                  }}
-                  required
-                  disabled={isLoading}
-                  className={errors.password ? "border-red-500" : ""}
-                />
-                {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Input
-                  type="password"
-                  placeholder="Confirmar contraseña"
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (errors.confirmPassword) {
-                      setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                    }
-                  }}
-                  required
-                  disabled={isLoading}
-                  className={errors.confirmPassword ? "border-red-500" : ""}
-                />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">
-                    {errors.confirmPassword}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Select value={street} onValueChange={handleStreetChange}>
+                <Select value={street} onValueChange={setStreet}>
                   <SelectTrigger
                     className={errors.street ? "border-red-500" : ""}
                   >
@@ -232,12 +209,7 @@ export const SignUpForm = () => {
                 {errors.street && (
                   <p className="text-sm text-red-500">{errors.street}</p>
                 )}
-              </div>
-              <div className="space-y-2">
-                <Select
-                  value={houseNumber}
-                  onValueChange={handleHouseNumberChange}
-                >
+                <Select value={houseNumber} onValueChange={setHouseNumber}>
                   <SelectTrigger
                     className={errors.houseNumber ? "border-red-500" : ""}
                   >
@@ -254,50 +226,148 @@ export const SignUpForm = () => {
                 {errors.houseNumber && (
                   <p className="text-sm text-red-500">{errors.houseNumber}</p>
                 )}
-              </div>
-              <PhoneNumberInput
-                value={phoneNumber}
-                onChange={handlePhoneChange}
-                disabled={isLoading}
-              />
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="privacy-policy"
-                  checked={acceptPrivacyPolicy}
-                  onCheckedChange={(checked) =>
-                    setAcceptPrivacyPolicy(checked === true)
-                  }
+                <PhoneNumberInput
+                  value={phoneNumber}
+                  onChange={(value, valid) => {
+                    setPhoneNumber(value);
+                    setIsPhoneValid(valid);
+                  }}
                   disabled={isLoading}
                 />
-                <label
-                  htmlFor="privacy-policy"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                {errors.phone && (
+                  <p className="text-sm text-red-500">{errors.phone}</p>
+                )}
+                <Input
+                  type="password"
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                {errors.password && (
+                  <p className="text-sm text-red-500">{errors.password}</p>
+                )}
+                <Input
+                  type="password"
+                  placeholder="Confirmar contraseña"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">
+                    {errors.confirmPassword}
+                  </p>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="privacy-policy"
+                    checked={acceptPrivacyPolicy}
+                    onCheckedChange={(checked) =>
+                      setAcceptPrivacyPolicy(checked === true)
+                    }
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="privacy-policy"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    Al registrarme acepto el{" "}
+                    <Link
+                      to="/disclaimer"
+                      className="text-marketplace-primary hover:underline"
+                    >
+                      aviso de privacidad
+                    </Link>
+                  </label>
+                </div>
+                {errors.privacyPolicy && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.privacyPolicy}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading || !acceptPrivacyPolicy}
                 >
-                  Al registrarme acepto el{" "}
+                  {isLoading ? "Enviando código..." : "Recibir código por SMS"}
+                </Button>
+              </form>
+            )}
+            {step === "otp" && (
+              <form onSubmit={handleVerifyOtp} className="space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Código de verificación (6 dígitos)"
+                  value={otp}
+                  onChange={(e) =>
+                    setOtp(e.target.value.replace(/\D/g, "").substring(0, 6))
+                  }
+                  required
+                  maxLength={6}
+                  disabled={isLoading}
+                  className="text-center text-lg tracking-widest"
+                />
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading || otp.length !== 6}
+                >
+                  {isLoading ? "Verificando..." : "Verificar Código"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={async () => {
+                    setIsLoading(true);
+                    try {
+                      await signInWithPhone(phoneNumber);
+                      toast({
+                        title: "Código reenviado",
+                        description:
+                          "Se ha enviado un nuevo código a tu número",
+                      });
+                      //eslint-disable-next-line
+                    } catch (error) {
+                      toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: "No se pudo reenviar el código",
+                      });
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  Reenviar código
+                </Button>
+              </form>
+            )}
+          </CardContent>
+          <CardFooter className="flex flex-col">
+            {step === "form" && (
+              <div className="mt-4 text-center w-full">
+                <p className="text-sm text-gray-500">
+                  ¿Ya tienes una cuenta?{" "}
                   <Link
-                    to="/disclaimer"
+                    to="/login"
                     className="text-marketplace-primary hover:underline"
                   >
-                    aviso de privacidad
+                    Inicia sesión aquí
                   </Link>
-                </label>
-              </div>
-              {errors.privacyPolicy && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.privacyPolicy}
                 </p>
-              )}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || !acceptPrivacyPolicy}
-              >
-                {isLoading ? "Registrando..." : "Registrarse"}
-              </Button>
-            </form>
-          </CardContent>
+              </div>
+            )}
+          </CardFooter>
         </Card>
       </div>
     </>
   );
 };
+
+export default RegisterForm;

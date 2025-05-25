@@ -23,7 +23,6 @@ const ProfileEdit = () => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
-    phone_number: "",
     street: "",
     house_number: "",
   });
@@ -34,7 +33,7 @@ const ProfileEdit = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, phone_number, street, house_number")
+        .select("full_name, street, house_number")
         .eq("id", user.id)
         .single();
       if (error) {
@@ -99,44 +98,34 @@ const ProfileEdit = () => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone_number">Teléfono</Label>
-            <Input
-              id="phone_number"
-              name="phone_number"
-              value={form.phone_number}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="street">Calle</Label>
             <Select
               value={form.street}
               onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, street: value }))
+                setForm((f) => ({ ...f, street: value }))
               }
             >
-              <SelectTrigger id="street" name="street">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecciona tu calle" />
               </SelectTrigger>
               <SelectContent>
-                {streets.map((streetName) => (
-                  <SelectItem key={streetName} value={streetName}>
-                    {streetName}
+                {streets.map((street) => (
+                  <SelectItem key={street} value={street}>
+                    {street}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="house_number">Número de casa</Label>
+            <Label htmlFor="house_number">Número</Label>
             <Select
               value={form.house_number}
               onValueChange={(value) =>
-                setForm((prev) => ({ ...prev, house_number: value }))
+                setForm((f) => ({ ...f, house_number: value }))
               }
             >
-              <SelectTrigger id="house_number" name="house_number">
+              <SelectTrigger>
                 <SelectValue placeholder="Selecciona el número" />
               </SelectTrigger>
               <SelectContent>
