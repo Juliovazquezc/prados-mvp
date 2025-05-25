@@ -29,6 +29,12 @@ const ResetPassword = () => {
 
   const accessToken = getAccessTokenFromHashOrQuery(location);
 
+  // Si no hay access_token, redirigir al index
+  if (!accessToken) {
+    navigate("/", { replace: true });
+    return null;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password.length < 6) {
