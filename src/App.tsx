@@ -29,6 +29,7 @@ import ProfileEdit from "./pages/ProfileEdit";
 import { LoadingSpinner } from "./components/ui/loading-spinner";
 import { ErrorFallback } from "./components/ui/error-fallback";
 import RequireAuth from "./components/auth/RequireAuth";
+import RedirectIfAuthenticated from "./components/auth/RedirectIfAuthenticated";
 import Footer from "./components/Footer";
 
 const queryClient = new QueryClient({
@@ -44,12 +45,13 @@ type RouteConfig = {
   path: string;
   element: React.ReactNode;
   requiresAuth?: boolean;
+  redirectIfAuth?: boolean;
 };
 
 const routes: RouteConfig[] = [
   { path: "/", element: <Index />, requiresAuth: true },
-  { path: "/login", element: <LoginForm /> },
-  { path: "/register", element: <SignUpForm /> },
+  { path: "/login", element: <LoginForm />, redirectIfAuth: true },
+  { path: "/register", element: <SignUpForm />, redirectIfAuth: true },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
   { path: "/my-listings", element: <MyListings />, requiresAuth: true },
@@ -73,19 +75,30 @@ const App: FC = () => {
                     <Suspense fallback={<LoadingSpinner />}>
                       <main className="flex-1 pb-20 md:pb-0">
                         <Routes>
-                          {routes.map(({ path, element, requiresAuth }) => (
-                            <Route
-                              key={path}
-                              path={path}
-                              element={
-                                requiresAuth ? (
-                                  <RequireAuth>{element}</RequireAuth>
-                                ) : (
-                                  element
-                                )
-                              }
-                            />
-                          ))}
+                          {routes.map(
+                            ({
+                              path,
+                              element,
+                              requiresAuth,
+                              redirectIfAuth,
+                            }) => (
+                              <Route
+                                key={path}
+                                path={path}
+                                element={
+                                  requiresAuth ? (
+                                    <RequireAuth>{element}</RequireAuth>
+                                  ) : redirectIfAuth ? (
+                                    <RedirectIfAuthenticated>
+                                      {element}
+                                    </RedirectIfAuthenticated>
+                                  ) : (
+                                    element
+                                  )
+                                }
+                              />
+                            )
+                          )}
                           <Route
                             path="/"
                             element={<Navigate to="/dashboard" replace />}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { PhoneNumberInput } from "@/components/PhoneNumberInput";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const SignUpForm = () => {
   const [email, setEmail] = useState("");
@@ -31,6 +32,7 @@ export const SignUpForm = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isPhoneValid, setIsPhoneValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [acceptPrivacyPolicy, setAcceptPrivacyPolicy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { signUp } = useAuth();
   const { toast } = useToast();
@@ -53,6 +55,9 @@ export const SignUpForm = () => {
     if (!houseNumber) newErrors.houseNumber = "Selecciona un número";
     if (!phoneNumber || !isPhoneValid)
       newErrors.phone = "Ingresa un número de teléfono válido";
+    if (!acceptPrivacyPolicy)
+      newErrors.privacyPolicy =
+        "Debes aceptar el aviso de privacidad para continuar";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -253,7 +258,38 @@ export const SignUpForm = () => {
                 onChange={handlePhoneChange}
                 disabled={isLoading}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="privacy-policy"
+                  checked={acceptPrivacyPolicy}
+                  onCheckedChange={(checked) =>
+                    setAcceptPrivacyPolicy(checked === true)
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="privacy-policy"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Al registrarme acepto el{" "}
+                  <Link
+                    to="/disclaimer"
+                    className="text-marketplace-primary hover:underline"
+                  >
+                    aviso de privacidad
+                  </Link>
+                </label>
+              </div>
+              {errors.privacyPolicy && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.privacyPolicy}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !acceptPrivacyPolicy}
+              >
                 {isLoading ? "Registrando..." : "Registrarse"}
               </Button>
             </form>
