@@ -15,6 +15,11 @@ export const signInWithEmailPassword = async (
   email: string,
   password: string
 ) => {
+  // Validate password length
+  if (password.length < 6) {
+    throw new Error("La contraseña debe tener al menos 6 caracteres");
+  }
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -31,6 +36,11 @@ export const signUpWithEmailPassword = async (
   password: string,
   metadata: UserMetadata
 ) => {
+  // Validate password length
+  if (password.length < 6) {
+    throw new Error("La contraseña debe tener al menos 6 caracteres");
+  }
+
   // Sign up the user
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
     email,

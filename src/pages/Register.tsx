@@ -47,6 +47,8 @@ export const SignUpForm = () => {
     if (!fullName) newErrors.fullName = "El nombre completo es requerido";
     if (!email) newErrors.email = "El correo electrónico es requerido";
     if (!password) newErrors.password = "La contraseña es requerida";
+    else if (password.length < 6)
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     if (!confirmPassword) newErrors.confirmPassword = "Confirma tu contraseña";
     if (password !== confirmPassword) {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
