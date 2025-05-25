@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "http://192.168.3.66:8080/reset-password",
+        redirectTo: `${window.location.origin}/reset-password`,
       });
       if (error) throw error;
       setSent(true);
