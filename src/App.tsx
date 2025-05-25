@@ -59,7 +59,11 @@ const routes: RouteConfig[] = [
     element: <ForgotPassword />,
     redirectIfAuth: true,
   },
-  { path: "/reset-password", element: <ResetPassword /> },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
+    redirectIfAuth: false,
+  },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
   { path: "/my-listings", element: <MyListings />, requiresAuth: true },
