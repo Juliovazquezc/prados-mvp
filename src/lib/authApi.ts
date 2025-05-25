@@ -3,6 +3,7 @@ import { supabase } from "./supabase";
 
 export type UserMetadata = {
   full_name: string;
+  email?: string;
   street: string;
   house_number: string;
   phone_number: string;
@@ -54,6 +55,7 @@ export const signUpWithEmailPassword = async (
   const { error: profileError } = await supabase.from("profiles").insert({
     id: authData.user.id,
     full_name: metadata.full_name,
+    email: email,
     phone_number: metadata.phone_number,
     street: metadata.street,
     house_number: metadata.house_number,
@@ -124,9 +126,13 @@ export const signInWithPhonePassword = async (
  * Set password after phone verification
  * @param password La nueva contraseña para el usuario
  */
-export const setPasswordAfterPhoneVerification = async (password: string) => {
+export const setPasswordAfterPhoneVerification = async (
+  password: string,
+  email: string
+) => {
   const { data, error } = await supabase.auth.updateUser({
     password: password,
+    email,
   });
 
   if (error) throw error;

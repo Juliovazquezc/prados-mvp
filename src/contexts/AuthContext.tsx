@@ -37,7 +37,10 @@ type AuthContextType = {
     | { user: null; session: null }
   >;
   signInWithPhonePassword: (phone: string, password: string) => Promise<void>;
-  setPassword: (password: string) => Promise<void>;
+  updateUserPasswordAndEmail: (
+    password: string,
+    email: string
+  ) => Promise<void>;
   signOut: () => Promise<void>;
   isAuthenticated: boolean;
 };
@@ -92,8 +95,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await signInWithPhonePassword(phone, password);
   };
 
-  const setPassword = async (password: string) => {
-    await setPasswordAfterPhoneVerification(password);
+  const updateUserPasswordAndEmail = async (
+    password: string,
+    email: string
+  ) => {
+    await setPasswordAfterPhoneVerification(password, email);
   };
 
   const signOut = async () => {
@@ -110,7 +116,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signInWithPhone: signInPhone,
         verifyPhoneOtp,
         signInWithPhonePassword: signInWithPhoneAndPassword,
-        setPassword,
+        updateUserPasswordAndEmail,
         signOut,
         isAuthenticated: !!user,
       }}

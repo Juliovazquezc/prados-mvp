@@ -26,6 +26,7 @@ import { supabase } from "@/lib/supabase";
 
 const RegisterForm = () => {
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [street, setStreet] = useState("");
   const [houseNumber, setHouseNumber] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -37,11 +38,8 @@ const RegisterForm = () => {
   const [step, setStep] = useState<"form" | "otp">("form");
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const {
-    signInWithPhone,
-    verifyPhoneOtp,
-    setPassword: updatePassword,
-  } = useAuth();
+  const { signInWithPhone, verifyPhoneOtp, updateUserPasswordAndEmail } =
+    useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -51,6 +49,8 @@ const RegisterForm = () => {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!fullName) newErrors.fullName = "El nombre completo es requerido";
+    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+      newErrors.email = "Ingresa un email válido";
     if (!street) newErrors.street = "Selecciona una calle";
     if (!houseNumber) newErrors.houseNumber = "Selecciona un número";
     if (!isPhoneValid) newErrors.phone = "Ingresa un número de teléfono válido";
@@ -129,12 +129,14 @@ const RegisterForm = () => {
     try {
       const response = await verifyPhoneOtp(phoneNumber, otp);
       if (response && response.user) {
-        await updatePassword(password);
+        await updateUserPasswordAndEmail(password, email);
+
         // Crear el perfil del usuario
         const { error: profileError } = await supabase.from("profiles").upsert(
           {
             id: response.user.id,
             full_name: fullName,
+            email: email,
             phone_number: phoneNumber,
             street: street,
             house_number: houseNumber,
@@ -191,6 +193,18 @@ const RegisterForm = () => {
                 />
                 {errors.fullName && (
                   <p className="text-sm text-red-500">{errors.fullName}</p>
+                )}
+                <Input
+                  type="email"
+                  placeholder="Correo electrónico"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  className={errors.email ? "border-red-500" : ""}
+                />
+                {errors.email && (
+                  <p className="text-sm text-red-500">{errors.email}</p>
                 )}
                 <Select value={street} onValueChange={setStreet}>
                   <SelectTrigger

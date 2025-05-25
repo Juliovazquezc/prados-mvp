@@ -24,6 +24,8 @@ import NotFound from "./pages/NotFound";
 import Disclaimer from "./pages/Disclaimer";
 import MyListings from "./pages/MyListings";
 import ProfileEdit from "./pages/ProfileEdit";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Components
 import { LoadingSpinner } from "./components/ui/loading-spinner";
@@ -52,6 +54,12 @@ const routes: RouteConfig[] = [
   { path: "/", element: <Index />, requiresAuth: true },
   { path: "/login", element: <LoginForm />, redirectIfAuth: true },
   { path: "/register", element: <RegisterForm />, redirectIfAuth: true },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+    redirectIfAuth: true,
+  },
+  { path: "/reset-password", element: <ResetPassword />, redirectIfAuth: true },
   { path: "/create", element: <CreateListing />, requiresAuth: true },
   { path: "/listings/:id", element: <ListingDetail />, requiresAuth: true },
   { path: "/my-listings", element: <MyListings />, requiresAuth: true },

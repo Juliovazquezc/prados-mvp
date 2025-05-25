@@ -105,6 +105,14 @@ const LoginForm = () => {
                   Regístrate aquí
                 </Link>
               </p>
+              <p className="text-sm text-gray-500 mt-2">
+                <Link
+                  to="/forgot-password"
+                  className="text-marketplace-primary hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </p>
             </div>
           </CardFooter>
         </Card>
