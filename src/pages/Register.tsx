@@ -77,7 +77,6 @@ const RegisterForm = () => {
     }
     setIsLoading(true);
     try {
-      // Validar que el teléfono no esté registrado
       const { data: existing, error: phoneError } = await supabase
         .from("profiles")
         .select("id")
@@ -131,7 +130,6 @@ const RegisterForm = () => {
       if (response && response.user) {
         await updateUserPasswordAndEmail(password, email);
 
-        // Crear el perfil del usuario
         const { error: profileError } = await supabase.from("profiles").upsert(
           {
             id: response.user.id,

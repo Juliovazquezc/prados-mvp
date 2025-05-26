@@ -21,7 +21,6 @@ const RedirectIfAuthenticated = ({
   }
 
   if (isAuthenticated) {
-    // Si el usuario ya está autenticado, redirigir al homepage
     return <Navigate to="/" replace />;
   }
 

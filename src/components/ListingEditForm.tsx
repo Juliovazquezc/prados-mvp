@@ -102,7 +102,6 @@ const ListingEditForm: React.FC<ListingEditFormProps> = ({
   const [state, dispatch] = useReducer(reducer, initialState);
   const categorySelectRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar dropdown al hacer click fuera
   React.useEffect(() => {
     if (!state.showCategoryDropdown) return;
     const handleClickOutside = (event: MouseEvent) => {
