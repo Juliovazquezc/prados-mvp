@@ -23,7 +23,6 @@ const ProfileEdit = () => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
-    email: "",
     street: "",
     house_number: "",
   });
@@ -34,7 +33,7 @@ const ProfileEdit = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, email, street, house_number")
+        .select("full_name, street, house_number")
         .eq("id", user.id)
         .single();
       if (error) {
@@ -94,17 +93,6 @@ const ProfileEdit = () => {
               id="full_name"
               name="full_name"
               value={form.full_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={form.email}
               onChange={handleChange}
               required
             />
